@@ -8,24 +8,14 @@ import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.core.configuration.annotation.StepScope;
-import org.springframework.batch.item.ItemReader;
-import org.springframework.batch.item.NonTransientResourceException;
-import org.springframework.batch.item.ParseException;
-import org.springframework.batch.item.UnexpectedInputException;
+import org.springframework.batch.item.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.URI;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 
 @Slf4j
@@ -36,18 +26,33 @@ import java.util.Set;
 public class RealestateItemReader implements ItemReader<BuildingDealDto>, StepExecutionListener {
 
     private final RestTemplate restTemplate;
-    private List<URI> uris;
+    private Iterator<URI> uriIterator;
+    @Value("${service.yaml.serviceKey")
+    private String serviceKey;
 
     @Override
     public void beforeStep(StepExecution stepExecution) {
-        Set<String> regionCodes = OpenApiContents.regionMap.keySet();
+        OpenApiContents.OpenApiRequest[] apiRequests = OpenApiContents.OpenApiRequest.values();
 
-        for(String regionCode : regionCodes){
-            StringBuilder sb = new StringBuilder();
-            uris.add(new URI(
+        ExecutionContext ctx = stepExecution.getExecutionContext();
+        List<URI> uris = new ArrayList<>();
+        Iterator<String> regionCodeIterator = OpenApiContents.regionMap.keySet().iterator();
 
-            ));
+        log.warn(ctx.get(OpenApiContents.URL).toString());
+
+        for(OpenApiContents.OpenApiRequest uri : OpenApiContents.OpenApiRequest.values()) {
+
+//            uris.(new URI(
+//                sb.append(String.format(uri, serviceKey, regionCodes.))
+//            ));
         }
+
+//        for(String regionCode : regionCodes){
+//            StringBuilder sb = new StringBuilder();
+//            uris.add(new URI(
+//                    sb.append(String.format(apiRequests))
+//            ));
+//        }
 
     }
 

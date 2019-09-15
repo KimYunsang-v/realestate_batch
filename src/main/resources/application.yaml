@@ -6,3 +6,5 @@ spring:
       password: kim111
       driver-class-name: com.mysql.jdbc.Driver
 
+  main:
+    web-application-type: none

@@ -1,11 +1,10 @@
 package kr.ac.skuniv.realestate_batch;
 
 import kr.ac.skuniv.realestate_batch.util.OpenApiContents;
-import lombok.extern.log4j.Log4j;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.batch.item.ExecutionContext;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -34,4 +33,6 @@ public class RealestateBatchApplicationTests {
             log.warn(test);
         }
     }
+
+
 }
