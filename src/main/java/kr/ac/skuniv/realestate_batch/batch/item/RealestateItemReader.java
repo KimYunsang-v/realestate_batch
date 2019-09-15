@@ -10,11 +10,14 @@ import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.*;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.*;
 
 
@@ -23,46 +26,65 @@ import java.util.*;
 @Component
 @StepScope
 @RequiredArgsConstructor
+@PropertySource("classpath:serviceKey.yaml")
 public class RealestateItemReader implements ItemReader<BuildingDealDto>, StepExecutionListener {
 
+    @Value("${serviceKey}")
+    private String serviceKey;
     private final RestTemplate restTemplate;
     private Iterator<URI> uriIterator;
-    @Value("${service.yaml.serviceKey")
-    private String serviceKey;
+
+    private String currentUri;
+    private String currentDate;
+    private String currentRegionCode;
+    private String currentBuildingType;
+    private String currentDealType;
 
     @Override
     public void beforeStep(StepExecution stepExecution) {
-        OpenApiContents.OpenApiRequest[] apiRequests = OpenApiContents.OpenApiRequest.values();
-
         ExecutionContext ctx = stepExecution.getExecutionContext();
         List<URI> uris = new ArrayList<>();
         Iterator<String> regionCodeIterator = OpenApiContents.regionMap.keySet().iterator();
 
-        log.warn(ctx.get(OpenApiContents.URL).toString());
+        setVariable(ctx);
 
-        for(OpenApiContents.OpenApiRequest uri : OpenApiContents.OpenApiRequest.values()) {
-
-//            uris.(new URI(
-//                sb.append(String.format(uri, serviceKey, regionCodes.))
-//            ));
+        while(regionCodeIterator.hasNext()) {
+            currentRegionCode = regionCodeIterator.next();
+            getUri();
         }
+    }
 
-//        for(String regionCode : regionCodes){
-//            StringBuilder sb = new StringBuilder();
-//            uris.add(new URI(
-//                    sb.append(String.format(apiRequests))
-//            ));
-//        }
+    private void setVariable(ExecutionContext ctx) {
+        currentUri = (String) ctx.get(OpenApiContents.URL);
+        currentBuildingType = (String) ctx.get(OpenApiContents.BUILDING_TYPE);
+        currentDealType = (String) ctx.get(OpenApiContents.DEAL_TYPE);
+        currentDate = "201512";
+    }
 
+    private URI getUri() {
+        StringBuilder sb = new StringBuilder();
+        URI resultUri;
+        try {
+            resultUri = new URI(
+                    sb.append(String.format(currentUri, serviceKey, currentRegionCode, currentDate)).toString()
+            );
+            log.warn(resultUri.toString());
+            return resultUri;
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @Override
     public BuildingDealDto read() throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
+
         return null;
     }
 
     @Override
     public ExitStatus afterStep(StepExecution stepExecution) {
+
         return null;
     }
 }
