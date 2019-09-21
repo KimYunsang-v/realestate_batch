@@ -1,5 +1,7 @@
 package kr.ac.skuniv.realestate_batch.batch.item;
 
+import kr.ac.skuniv.realestate_batch.domain.dto.BargainDto;
+import kr.ac.skuniv.realestate_batch.domain.dto.CharterAndRentDto;
 import kr.ac.skuniv.realestate_batch.domain.dto.openApiDto.BuildingDealDto;
 import kr.ac.skuniv.realestate_batch.util.OpenApiContents;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +16,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
@@ -47,18 +50,20 @@ public class RealestateItemReader implements ItemReader<BuildingDealDto>, StepEx
         Iterator<String> regionCodeIterator = OpenApiContents.regionMap.keySet().iterator();
 
         setVariable(ctx);
+        List<URI> urlList = new ArrayList<>();
 
         while(regionCodeIterator.hasNext()) {
             currentRegionCode = regionCodeIterator.next();
-            getUri();
+            urlList.add(getUri());
         }
+        uriIterator = urlList.iterator();
     }
 
     private void setVariable(ExecutionContext ctx) {
         currentUri = (String) ctx.get(OpenApiContents.URL);
         currentBuildingType = (String) ctx.get(OpenApiContents.BUILDING_TYPE);
         currentDealType = (String) ctx.get(OpenApiContents.DEAL_TYPE);
-        currentDate = "201512";
+        currentDate = "200601";
     }
 
     private URI getUri() {
@@ -76,9 +81,25 @@ public class RealestateItemReader implements ItemReader<BuildingDealDto>, StepEx
         return null;
     }
 
+    private void setBuildingWithDeal(BuildingDealDto buildingDealDto) {
+        buildingDealDto.setDealType(currentDealType);
+        buildingDealDto.setBuildingType(currentBuildingType);
+    }
+
     @Override
     public BuildingDealDto read() throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
-
+        while(uriIterator.hasNext()){
+            if (currentDealType.equals(OpenApiContents.BARGAIN_NUM)){
+                URI uri = uriIterator.next();
+                BargainDto bargainDto = restTemplate.getForObject(uri, BargainDto.class);
+                setBuildingWithDeal(bargainDto);
+                return bargainDto;
+            }
+            URI uri = uriIterator.next();
+            CharterAndRentDto charterAndRentDto = restTemplate.getForObject(uri, CharterAndRentDto.class);
+            setBuildingWithDeal(charterAndRentDto);
+            return charterAndRentDto;
+        }
         return null;
     }
 
