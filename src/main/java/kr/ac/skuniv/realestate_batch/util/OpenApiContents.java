@@ -15,7 +15,8 @@ public final class OpenApiContents {
     public static String BARGAIN_NUM = "1";
     public static String CHARTER_RENT_NUM = "2";
 
-    public static final String FILE_DELEMETER = "/";
+    public static final String FILE_DELEMETER_LINUX = "/";
+    public static final String FILE_DELEMETER_WINDOWS = "\\";
     public static final String PARTITION_KEY = "partition_";
     public static final String URL = "url";
     public static final String API_KIND = "apiKind";

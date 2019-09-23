@@ -19,7 +19,7 @@ public class BargainBodyDto {
 
     @XmlElementWrapper(name = "items")
     @XmlElement(name = "item")
-    private List<BargainItemDto> items;
+    private List<BargainItemDto> item;
 
     @XmlElement(name = "numOfRows")
     private int numOfRows;

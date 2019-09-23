@@ -12,6 +12,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @ToString
+@Getter
 @XmlRootElement(name = "response")
 public class BargainDto extends BuildingDealDto {
     @XmlElement(name = "body")
