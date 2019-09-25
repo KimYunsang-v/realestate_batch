@@ -9,6 +9,7 @@ import kr.ac.skuniv.realestate_batch.domain.dto.openApiDto.CharterAndRentItemDto
 import kr.ac.skuniv.realestate_batch.util.OpenApiContents;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.aspectj.apache.bcel.classfile.Module;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
@@ -38,6 +39,8 @@ public class RealestateItemWriter implements ItemWriter<BuildingDealDto>, StepEx
     @Value("${filePath}")
     private String filePath;
     private BufferedWriter bufferedWriter;
+    private String dealType;
+    private String buildingType;
 
     private void write(BufferedWriter bw, String content) throws IOException {
         bw.write(content);
@@ -61,6 +64,10 @@ public class RealestateItemWriter implements ItemWriter<BuildingDealDto>, StepEx
     @Override
     public void beforeStep(StepExecution stepExecution) {
         ExecutionContext ctx = stepExecution.getExecutionContext();
+        dealType = (String) ctx.get(OpenApiContents.DEAL_TYPE);
+        buildingType = (String) ctx.get(OpenApiContents.BUILDING_TYPE);
+
+
         fileName = (String) ctx.get(OpenApiContents.API_KIND);
         String fileFullPath = filePath + OpenApiContents.FILE_DELEMETER_WINDOWS + fileName;
         File f = new File(fileFullPath);
@@ -75,7 +82,8 @@ public class RealestateItemWriter implements ItemWriter<BuildingDealDto>, StepEx
     @Override
     public void write(List<? extends BuildingDealDto> items) throws Exception {
         for (BuildingDealDto item : items){
-            divisionItem(item, bufferedWriter);
+            log.warn("item =======  " + item.toString());
+            //divisionItem(item, bufferedWriter);
         }
     }
 
