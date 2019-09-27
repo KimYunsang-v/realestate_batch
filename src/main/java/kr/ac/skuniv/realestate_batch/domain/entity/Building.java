@@ -2,20 +2,14 @@ package kr.ac.skuniv.realestate_batch.domain.entity;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Data
 public class Building {
 
     @Id
@@ -29,6 +23,7 @@ public class Building {
     private Double area;
     private int floor;
     private int type;
+    private String constructYear;
     private String latitude;
     private String longitude;
 
@@ -45,4 +40,5 @@ public class Building {
     @OneToMany(mappedBy = "building", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private Set<RentDate> rentDates = new HashSet<RentDate>();
+
 }

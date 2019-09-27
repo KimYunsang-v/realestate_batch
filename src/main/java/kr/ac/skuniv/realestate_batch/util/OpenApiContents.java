@@ -17,11 +17,13 @@ public final class OpenApiContents {
 
     public static final String FILE_DELEMETER_LINUX = "/";
     public static final String FILE_DELEMETER_WINDOWS = "\\";
+    public static final String DELETEMETER_DATE = "~";
     public static final String PARTITION_KEY = "partition_";
     public static final String URL = "url";
     public static final String API_KIND = "apiKind";
     public static final String BUILDING_TYPE = "buildingType";
     public static final String DEAL_TYPE = "dealType";
+
 
     @Getter
     @AllArgsConstructor
