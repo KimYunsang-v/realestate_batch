@@ -45,7 +45,7 @@ public class DataWriteTasklet implements Tasklet, StepExecutionListener, Initial
     private String fileName;
     private String dealType;
     private List newDataList;
-    private int buildingType;
+    private String buildingType;
 
     private int city;
     private int groop;
@@ -59,7 +59,7 @@ public class DataWriteTasklet implements Tasklet, StepExecutionListener, Initial
         log.warn("fileName => {}", fileName);
         dealType = (String) ctx.get(OpenApiContents.DEAL_TYPE);
         log.warn("dealType => {}", dealType);
-        buildingType = Integer.parseInt((String) ctx.get(OpenApiContents.BUILDING_TYPE));
+        buildingType = (String) ctx.get(OpenApiContents.BUILDING_TYPE);
         log.warn("buildingType => {}", buildingType);
 
         newDataList = new ArrayList<CharterAndRentItemDto>();
@@ -89,7 +89,7 @@ public class DataWriteTasklet implements Tasklet, StepExecutionListener, Initial
             return;
         }
         while ((line = br.readLine()) != null) {
-            CharterAndRentItemDto charterWithRentItemDto = gson.fromJson(line.trim(), CharterAndRentItemDto.class);
+            //CharterAndRentItemDto charterWithRentItemDto = gson.fromJson(line.trim(), CharterAndRentItemDto.class);
             list.add(gson.fromJson(line.trim(), CharterAndRentItemDto.class));
         }
     }
@@ -122,18 +122,18 @@ public class DataWriteTasklet implements Tasklet, StepExecutionListener, Initial
                     building.setLongitude(googleLocationDto.getLongitude());
                 }*/
 
-                String[] splitDays = bargainItemDto.getDays().split(OpenApiContents.DELETEMETER_DATE);
-                int startDay = Integer.parseInt(splitDays[0]);
-                int endDay = Integer.parseInt(splitDays[1]);
-                for (int i = startDay; i <= endDay; i++) {
-                    Date date = new GregorianCalendar(bargainItemDto.getYear(), bargainItemDto.getMonthly() - 1, i).getTime();
-                    BargainDate bargainDate = new BargainDate();
-                    bargainDate.setBuilding(building);
-                    bargainDate.setDate(date);
-                    bargainDate.setPrice(bargainItemDto.getDealPrice().trim());
+                //String[] splitDays = bargainItemDto.getDays().split(OpenApiContents.DELETEMETER_DATE);
+//                int startDay = Integer.parseInt(splitDays[0]);
+//                int endDay = Integer.parseInt(splitDays[1]);
+                //for (int i = startDay; i <= endDay; i++) {
+                Date date = new GregorianCalendar(bargainItemDto.getYear(), bargainItemDto.getMonthly() - 1, Integer.parseInt(bargainItemDto.getDays())).getTime();
+                BargainDate bargainDate = new BargainDate();
+                bargainDate.setBuilding(building);
+                bargainDate.setDate(date);
+                bargainDate.setPrice(bargainItemDto.getDealPrice().trim());
 
-                    building.getBargainDates().add(bargainDate);
-                }
+                building.getBargainDates().add(bargainDate);
+                //}
                 log.warn("insert building trade info => {}", building.toString());
                 buildingRepository.save(building);
                 return;
@@ -141,8 +141,8 @@ public class DataWriteTasklet implements Tasklet, StepExecutionListener, Initial
 
             // 전월세의 경우
             CharterAndRentItemDto charterWithRentItemDto = (CharterAndRentItemDto) item;
-            int city = Integer.parseInt(charterWithRentItemDto.getRegionCode().substring(0, 2));
-            int groop = Integer.parseInt(charterWithRentItemDto.getRegionCode().substring(2));
+            city = Integer.parseInt(charterWithRentItemDto.getRegionCode().substring(0, 2));
+            groop = Integer.parseInt(charterWithRentItemDto.getRegionCode().substring(2));
             //Building building = buildingRepository.findByCityAndGroopAndBuildingNumAndFloor(city, groop, charterWithRentItemDto.getBuildingNum(), charterWithRentItemDto.getFloor());
 //            if (building == null) {
 ////                building = new Building.Builder().city(city).groop(groop).dong(charterWithRentItemDto.getDong())
@@ -170,50 +170,51 @@ public class DataWriteTasklet implements Tasklet, StepExecutionListener, Initial
             building.setConstructYear(String.valueOf(charterWithRentItemDto.getConstructYear()));
 
             log.warn("building create => {}", building.toString());
-            String[] splitDays = charterWithRentItemDto.getDays().split(OpenApiContents.DELETEMETER_DATE);
-            int startDay = Integer.parseInt(splitDays[0]);
-            int endDay = Integer.parseInt(splitDays[1]);
-            log.warn("start day => {}, end day => {}", startDay, endDay);
+//            String[] splitDays = charterWithRentItemDto.getDays().split(OpenApiContents.DELETEMETER_DATE);
+//            int startDay = Integer.parseInt(splitDays[0]);
+//            int endDay = Integer.parseInt(splitDays[1]);
+           // log.warn("start day => {}, end day => {}", startDay, endDay);
             if (Integer.parseInt(charterWithRentItemDto.getMonthlyPrice().trim()) != 0) {
                 log.warn("월세!!!");
                 // 월세
-                for (int i = startDay; i <= endDay; i++) {
-                    Date date = new GregorianCalendar(charterWithRentItemDto.getYear(), charterWithRentItemDto.getMonthly() - 1, i).getTime();
+               // for (int i = startDay; i <= endDay; i++) {
+                Date date = new GregorianCalendar(charterWithRentItemDto.getYear(), charterWithRentItemDto.getMonthly() - 1, Integer.parseInt(charterWithRentItemDto.getDays())).getTime();
 //                    RentDate rentDate = new RentDate.Builder().building(building).date(date)
 //                            .guaranteePrice(charterWithRentItemDto.getGuaranteePrice().trim())
 //                            .monthlyPrice(charterWithRentItemDto.getMonthlyPrice().trim())
 //                            .build();
 //                    building.getRentDates().add(rentDate);
 
-                    RentDate rentDate = new RentDate();
-                    rentDate.setDate(date);
-                    rentDate.setBuilding(building);
-                    rentDate.setGuaranteePrice(charterWithRentItemDto.getGuaranteePrice().trim());
-                    rentDate.setMonthlyPrice(charterWithRentItemDto.getMonthlyPrice().trim());
+                RentDate rentDate = new RentDate();
 
-                    building.getRentDates().add(rentDate);
-                }
+                rentDate.setDate(date);
+                rentDate.setBuilding(building);
+                rentDate.setGuaranteePrice(charterWithRentItemDto.getGuaranteePrice().trim());
+                rentDate.setMonthlyPrice(charterWithRentItemDto.getMonthlyPrice().trim());
+
+                building.getRentDates().add(rentDate);
+                //}
                 log.warn("insert building trade info => {}", building.toString());
                 buildingRepository.save(building);
                 return;
             }
             // 전세
             log.warn("전세!!!");
-            for (int i = startDay; i <= endDay; i++) {
-                Date date = new GregorianCalendar(charterWithRentItemDto.getYear(), charterWithRentItemDto.getMonthly() - 1, i).getTime();
+            //for (int i = startDay; i <= endDay; i++) {
+            Date date = new GregorianCalendar(charterWithRentItemDto.getYear(), charterWithRentItemDto.getMonthly() - 1, Integer.parseInt(charterWithRentItemDto.getDays())).getTime();
 //                CharterDate charterDate = new CharterDate.Builder().building(building).date(date)
 //                        .price(charterWithRentItemDto.getGuaranteePrice().trim())
 //                        .build();
 
 
-                CharterDate charterDate = new CharterDate();
-                charterDate.setBuilding(building);
-                charterDate.setDate(date);
-                charterDate.setPrice(charterWithRentItemDto.getGuaranteePrice().trim());
+            CharterDate charterDate = new CharterDate();
+            charterDate.setBuilding(building);
+            charterDate.setDate(date);
+            charterDate.setPrice(charterWithRentItemDto.getGuaranteePrice().trim());
 
                 building.getCharterDates().add(charterDate);
 
-            }
+            //}
             log.warn("insert building trade info => {}", building.toString());
             buildingRepository.save(building);
         });
@@ -225,7 +226,6 @@ public class DataWriteTasklet implements Tasklet, StepExecutionListener, Initial
         Building building = new Building();
         building.setCity(city);
         building.setGroop(groop);
-
         building.setType(buildingType);
 
         building.setBargainDates(new HashSet<BargainDate>());
@@ -260,7 +260,6 @@ public class DataWriteTasklet implements Tasklet, StepExecutionListener, Initial
 
     @Override
     public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
-
         insertData(newDataList);
         return RepeatStatus.FINISHED;
     }

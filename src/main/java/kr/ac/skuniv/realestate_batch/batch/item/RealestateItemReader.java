@@ -63,7 +63,7 @@ public class RealestateItemReader implements ItemReader<BuildingDealDto>, StepEx
         currentUri = (String) ctx.get(OpenApiContents.URL);
         currentBuildingType = (String) ctx.get(OpenApiContents.BUILDING_TYPE);
         currentDealType = (String) ctx.get(OpenApiContents.DEAL_TYPE);
-        currentDate = "200601";
+        currentDate = "201101";
     }
 
     private URI getUri() {

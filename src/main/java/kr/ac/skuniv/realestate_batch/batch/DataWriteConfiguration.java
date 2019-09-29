@@ -31,36 +31,37 @@ public class DataWriteConfiguration {
     private final DataSource dataSource;
 
 
-    @Bean
-    public Job extractDiffDataJob() {
-        return jobBuilderFactory.get("extractDiffDataJob")
-                .start(extractDiffDataPartitionStep())
-                .build();
-    }
+//    @Bean
+//    public Job extractDiffDataJob() {
+//        log.warn("----------diff data job");
+//        return jobBuilderFactory.get("extractDiffDataJob")
+//                .start(extractDiffDataPartitionStep())
+//                .build();
+//    }
+//
+//    @Bean
+//    public Step extractDiffDataPartitionStep()
+//            throws UnexpectedInputException, ParseException {
+//        return stepBuilderFactory.get("extractDiffDataPartitionStep")
+//                .partitioner("extractDiffDataPartitionStep", realestatePartitioner)
+//                .step(extractDiffDataTrtStep())
+//                .build();
+//    }
 
-    @Bean
-    public Step extractDiffDataPartitionStep()
-            throws UnexpectedInputException, ParseException {
-        return stepBuilderFactory.get("extractDiffDataPartitionStep")
-                .partitioner("extractDiffDataPartitionStep", realestatePartitioner)
-                .step(extractDiffDataTrtStep())
-                .build();
-    }
-
-    @Bean
-    @Transactional
-    public Step extractDiffDataTrtStep() {
-        return stepBuilderFactory.get("extractDiffDataTrtStep")
-                .transactionManager(jpaTransactionManager())
-                .tasklet(dataWriteTasklet)
-                .build();
-    }
-
-    @Bean
-    @Primary
-    public JpaTransactionManager jpaTransactionManager() {
-        final JpaTransactionManager transactionManager = new JpaTransactionManager();
-        transactionManager.setDataSource(dataSource);
-        return transactionManager;
-    }
+//    @Bean
+//    @Transactional
+//    public Step extractDiffDataTrtStep() {
+//        return stepBuilderFactory.get("extractDiffDataTrtStep")
+//                .transactionManager(jpaTransactionManager())
+//                .tasklet(dataWriteTasklet)
+//                .build();
+//    }
+//
+//    @Bean
+//    @Primary
+//    public JpaTransactionManager jpaTransactionManager() {
+//        final JpaTransactionManager transactionManager = new JpaTransactionManager();
+//        transactionManager.setDataSource(dataSource);
+//        return transactionManager;
+//    }
 }

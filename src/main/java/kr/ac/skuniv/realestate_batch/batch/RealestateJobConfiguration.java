@@ -1,6 +1,7 @@
 package kr.ac.skuniv.realestate_batch.batch;
 
 
+import kr.ac.skuniv.realestate_batch.batch.item.DataWriteTasklet;
 import kr.ac.skuniv.realestate_batch.batch.item.RealestateItemReader;
 import kr.ac.skuniv.realestate_batch.batch.item.RealestateItemWriter;
 import kr.ac.skuniv.realestate_batch.batch.item.RealestatePartitioner;
@@ -22,6 +23,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
@@ -39,13 +41,15 @@ public class RealestateJobConfiguration extends DefaultBatchConfigurer {
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
 
-    private final EntityManagerFactory entityManagerFactory;
-    //private final DataSource dataSource;
+    private final DataWriteTasklet dataWriteTasklet;
+    private final DataSource dataSource;
 
     @Bean
     public Job apiCallJob() {
+        log.warn("----------api call job");
         return jobBuilderFactory.get("apiCallJob")
                 .start(apiCallPartitionStep())
+                //.next(dataWritePartitionStep())
                 .build();
     }
 
@@ -59,12 +63,37 @@ public class RealestateJobConfiguration extends DefaultBatchConfigurer {
     }
 
     @Bean
+    public Step dataWritePartitionStep()
+            throws UnexpectedInputException, ParseException {
+        return stepBuilderFactory.get("dataWritePartitionStep")
+                .partitioner("dataWritePartitionStep", realestatePartitioner)
+                .step(DataWriteStep())
+                .build();
+    }
+
+    @Bean
     public Step apiCallStep() {
         return stepBuilderFactory.get("apiCallStep").<BuildingDealDto, BuildingDealDto>chunk(12)
                 .reader(realestateItemReader)
                 .writer(realestateItemWriter)
-                //.transactionManager(jpaTransactionManager())
                 .build();
+    }
+
+    @Bean
+    @Transactional
+    public Step DataWriteStep() {
+        return stepBuilderFactory.get("DataWriteStep")
+                .transactionManager(jpaTransactionManager())
+                .tasklet(dataWriteTasklet)
+                .build();
+    }
+
+    @Bean
+    @Primary
+    public JpaTransactionManager jpaTransactionManager() {
+        final JpaTransactionManager transactionManager = new JpaTransactionManager();
+        transactionManager.setDataSource(dataSource);
+        return transactionManager;
     }
 
 //    private JpaItemWriter<Building> writer() {

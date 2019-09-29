@@ -22,7 +22,7 @@ public class Building {
     private String name;
     private Double area;
     private int floor;
-    private int type;
+    private String type;
     private String constructYear;
     private String latitude;
     private String longitude;

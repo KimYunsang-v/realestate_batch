@@ -71,6 +71,7 @@ public class RealestateItemWriter implements ItemWriter<BuildingDealDto>, StepEx
         } else {
             CharterAndRentDto charterAndRentDto = (CharterAndRentDto) item;
             for (CharterAndRentItemDto charterAndRentItemDto : charterAndRentDto.getBody().getItem()) {
+                log.warn("chater --------write ---------{}", gson.toJson(charterAndRentItemDto));
                 write(bw, gson.toJson(charterAndRentItemDto));
             }
         }
