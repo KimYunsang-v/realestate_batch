@@ -8,7 +8,7 @@ spring:
     jdbc-url: jdbc:log4jdbc:mysql://localhost:3306/spring_batch?useSSL=false&serverTimezone=Asia/Seoul
     username: root
     password: kim111
-    driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
+    driver-class-name: com.mysql.jdbc.Driver
 
   main:
     web-application-type: none
