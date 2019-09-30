@@ -10,7 +10,10 @@ import java.util.Set;
 
 @Entity
 @Data
-public class Building {
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class BuildingEntity {
 
     @Id
     @GeneratedValue

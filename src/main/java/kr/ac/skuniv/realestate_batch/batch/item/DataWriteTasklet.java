@@ -5,10 +5,11 @@ import com.google.gson.Gson;
 import kr.ac.skuniv.realestate_batch.domain.dto.openApiDto.BargainItemDto;
 import kr.ac.skuniv.realestate_batch.domain.dto.openApiDto.CharterAndRentItemDto;
 import kr.ac.skuniv.realestate_batch.domain.entity.BargainDate;
-import kr.ac.skuniv.realestate_batch.domain.entity.Building;
+import kr.ac.skuniv.realestate_batch.domain.entity.BuildingEntity;
 import kr.ac.skuniv.realestate_batch.domain.entity.CharterDate;
 import kr.ac.skuniv.realestate_batch.domain.entity.RentDate;
-import kr.ac.skuniv.realestate_batch.repository.BuildingRepository;
+import kr.ac.skuniv.realestate_batch.repository.BuildingEntityRepository;
+import kr.ac.skuniv.realestate_batch.service.DataWriteService;
 import kr.ac.skuniv.realestate_batch.util.OpenApiContents;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +39,7 @@ import java.util.*;
 public class DataWriteTasklet implements Tasklet, StepExecutionListener, InitializingBean{
 
     private static final Gson gson = new Gson();
-    private final BuildingRepository buildingRepository;
+    private final BuildingEntityRepository buildingRepository;
 //    private final GoogleLocationApiService googleLocationApiService;
     @Value("${filePath}")
     private String filePath;
@@ -107,13 +108,23 @@ public class DataWriteTasklet implements Tasklet, StepExecutionListener, Initial
                 city = Integer.parseInt(bargainItemDto.getRegionCode().substring(0,2));
                 groop = Integer.parseInt(bargainItemDto.getRegionCode().substring(2));
 
-                Building building = buildingBuilder();
-                building.setDong(bargainItemDto.getDong());
-                building.setName(bargainItemDto.getName());
-                building.setArea(bargainItemDto.getArea());
-                building.setFloor(bargainItemDto.getFloor());
-                building.setBuildingNum(bargainItemDto.getBuildingNum());
-                building.setConstructYear(String.valueOf(bargainItemDto.getConstructYear()));
+                BuildingEntity building = new BuildingEntity().builder().city(city).groop(groop).dong(bargainItemDto.getDong())
+                        .name(bargainItemDto.getName()).area(bargainItemDto.getArea()).floor(bargainItemDto.getFloor()).type(buildingType)
+                        .buildingNum(bargainItemDto.getBuildingNum()).constructYear(String.valueOf(bargainItemDto.getConstructYear()))
+                        .bargainDates(new HashSet<BargainDate>())
+                        .charterDates(new HashSet<CharterDate>())
+                        .rentDates(new HashSet<RentDate>())
+                        .build();
+
+//                Building building = buildingBuilder();
+//                building.setDong(bargainItemDto.getDong());
+//                building.setName(bargainItemDto.getName());
+//                building.setArea(bargainItemDto.getArea());
+//                building.setFloor(bargainItemDto.getFloor());
+//                building.setBuildingNum(bargainItemDto.getBuildingNum());
+//                building.setConstructYear(String.valueOf(bargainItemDto.getConstructYear()));
+
+                DataWriteService dataWriteService = new DataWriteService().builder().city(city).build();
 
                 String address = bargainItemDto.getDong() + bargainItemDto.getName();
                 /*GoogleLocationDto googleLocationDto = googleLocationApiService.googleLocationApiCall(address.replaceAll(" ",""));
@@ -128,7 +139,7 @@ public class DataWriteTasklet implements Tasklet, StepExecutionListener, Initial
                 //for (int i = startDay; i <= endDay; i++) {
                 Date date = new GregorianCalendar(bargainItemDto.getYear(), bargainItemDto.getMonthly() - 1, Integer.parseInt(bargainItemDto.getDays())).getTime();
                 BargainDate bargainDate = new BargainDate();
-                bargainDate.setBuilding(building);
+                bargainDate.setBuildingEntity(building);
                 bargainDate.setDate(date);
                 bargainDate.setPrice(bargainItemDto.getDealPrice().trim());
 
@@ -161,7 +172,7 @@ public class DataWriteTasklet implements Tasklet, StepExecutionListener, Initial
 ////                }
 //            }
 
-            Building building = buildingBuilder();
+            BuildingEntity building = buildingBuilder();
             building.setDong(charterWithRentItemDto.getDong());
             building.setName(charterWithRentItemDto.getName());
             building.setArea(charterWithRentItemDto.getArea());
@@ -188,7 +199,7 @@ public class DataWriteTasklet implements Tasklet, StepExecutionListener, Initial
                 RentDate rentDate = new RentDate();
 
                 rentDate.setDate(date);
-                rentDate.setBuilding(building);
+                rentDate.setBuildingEntity(building);
                 rentDate.setGuaranteePrice(charterWithRentItemDto.getGuaranteePrice().trim());
                 rentDate.setMonthlyPrice(charterWithRentItemDto.getMonthlyPrice().trim());
 
@@ -208,7 +219,7 @@ public class DataWriteTasklet implements Tasklet, StepExecutionListener, Initial
 
 
             CharterDate charterDate = new CharterDate();
-            charterDate.setBuilding(building);
+            charterDate.setBuildingEntity(building);
             charterDate.setDate(date);
             charterDate.setPrice(charterWithRentItemDto.getGuaranteePrice().trim());
 
@@ -222,8 +233,8 @@ public class DataWriteTasklet implements Tasklet, StepExecutionListener, Initial
         buildingRepository.flush();
     }
 
-    private Building buildingBuilder(){
-        Building building = new Building();
+    private BuildingEntity buildingBuilder(){
+        BuildingEntity building = new BuildingEntity();
         building.setCity(city);
         building.setGroop(groop);
         building.setType(buildingType);

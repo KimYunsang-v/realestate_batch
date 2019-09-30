@@ -6,35 +6,24 @@ import kr.ac.skuniv.realestate_batch.domain.dto.CharterAndRentDto;
 import kr.ac.skuniv.realestate_batch.domain.dto.openApiDto.BargainItemDto;
 import kr.ac.skuniv.realestate_batch.domain.dto.openApiDto.BuildingDealDto;
 import kr.ac.skuniv.realestate_batch.domain.dto.openApiDto.CharterAndRentItemDto;
-import kr.ac.skuniv.realestate_batch.domain.entity.BargainDate;
-import kr.ac.skuniv.realestate_batch.domain.entity.Building;
-import kr.ac.skuniv.realestate_batch.domain.entity.CharterDate;
-import kr.ac.skuniv.realestate_batch.domain.entity.RentDate;
-import kr.ac.skuniv.realestate_batch.repository.BuildingRepository;
 import kr.ac.skuniv.realestate_batch.util.OpenApiContents;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.apache.bcel.classfile.Module;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.database.JpaItemWriter;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
-import javax.transaction.Transactional;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashSet;
 import java.util.List;
 
 @Slf4j
@@ -53,7 +42,6 @@ public class RealestateItemWriter implements ItemWriter<BuildingDealDto>, StepEx
     private String dealType;
     private String buildingType;
 
-    private final BuildingRepository buildingRepository;
 
     int city, groop;
 

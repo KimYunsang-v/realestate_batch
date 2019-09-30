@@ -17,7 +17,7 @@ public class RentDate {
     private Long id;
 
     @ManyToOne(cascade = CascadeType.ALL)
-    private Building building;
+    private BuildingEntity buildingEntity;
 
     @Temporal(TemporalType.DATE)
     private Date date;
