@@ -6,7 +6,6 @@ import kr.ac.skuniv.realestate_batch.batch.item.RealestateItemReader;
 import kr.ac.skuniv.realestate_batch.batch.item.RealestateItemWriter;
 import kr.ac.skuniv.realestate_batch.batch.item.RealestatePartitioner;
 import kr.ac.skuniv.realestate_batch.domain.dto.openApiDto.BuildingDealDto;
-import kr.ac.skuniv.realestate_batch.domain.entity.Building;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
@@ -49,7 +48,7 @@ public class RealestateJobConfiguration extends DefaultBatchConfigurer {
         log.warn("----------api call job");
         return jobBuilderFactory.get("apiCallJob")
                 .start(apiCallPartitionStep())
-                //.next(dataWritePartitionStep())
+                .next(dataWritePartitionStep())
                 .build();
     }
 
