@@ -43,5 +43,4 @@ public class BuildingEntity {
     @OneToMany(mappedBy = "buildingEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private Set<RentDate> rentDates = new HashSet<RentDate>();
-
 }

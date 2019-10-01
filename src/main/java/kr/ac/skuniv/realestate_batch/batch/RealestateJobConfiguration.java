@@ -48,7 +48,7 @@ public class RealestateJobConfiguration extends DefaultBatchConfigurer {
         log.warn("----------api call job");
         return jobBuilderFactory.get("apiCallJob")
                 .start(apiCallPartitionStep())
-                .next(dataWritePartitionStep())
+                //.next(dataWritePartitionStep())
                 .build();
     }
 
