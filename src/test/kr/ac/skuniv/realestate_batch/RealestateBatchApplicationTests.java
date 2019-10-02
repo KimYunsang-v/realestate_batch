@@ -45,6 +45,7 @@ public class RealestateBatchApplicationTests {
             log.warn(String.format(test.getUrl(),"2000","3000"));
 
             //log.warn(test.getUrl());
+
         }
     }
 
