@@ -17,6 +17,7 @@ public class CharterDate {
     private Long id;
 
     @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "building_id")
     private BuildingEntity buildingEntity;
 
     @Temporal(TemporalType.DATE)
