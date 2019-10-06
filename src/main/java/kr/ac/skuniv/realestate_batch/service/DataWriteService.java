@@ -8,9 +8,12 @@ import kr.ac.skuniv.realestate_batch.domain.entity.BargainDate;
 import kr.ac.skuniv.realestate_batch.domain.entity.BuildingEntity;
 import kr.ac.skuniv.realestate_batch.domain.entity.CharterDate;
 import kr.ac.skuniv.realestate_batch.domain.entity.RentDate;
+import kr.ac.skuniv.realestate_batch.repository.BuildingEntityRepository;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -18,24 +21,37 @@ import java.util.GregorianCalendar;
 import java.util.HashSet;
 
 @Service
+@Setter
 public class DataWriteService {
 
     private int city, groop;
     private String buildingType, address;
     private BuildingEntity buildingEntity;
     private Date date;
+    @Autowired
+    private BuildingEntityRepository buildingEntityRepository;
 
     public BuildingEntity buildBuildingEntity(ItemDto itemDto){
          buildingEntity =  new BuildingEntity().builder().city(city).groop(groop).dong(itemDto.getDong())
                 .name(itemDto.getName()).area(itemDto.getArea()).floor(itemDto.getFloor()).type(buildingType)
                 .buildingNum(itemDto.getBuildingNum()).constructYear(String.valueOf(itemDto.getConstructYear()))
-                .bargainDates(new HashSet<BargainDate>())
-                .charterDates(new HashSet<CharterDate>())
-                .rentDates(new HashSet<RentDate>())
+//                .bargainDates(new HashSet<BargainDate>())
+//                .charterDates(new HashSet<CharterDate>())
+//                .rentDates(new HashSet<RentDate>())
                 .build();
 
          setLocation();
-         return buildingEntity;
+//        buildingEntityRepository.save(buildingEntity);
+//        buildingEntityRepository.flush();
+        return buildingEntity;
+    }
+
+    public BuildingEntity getBuildingEntity(ItemDto itemDto){
+        buildingEntity = buildingEntityRepository.findByCityAndGroopAndBuildingNumAndFloor(city, groop, itemDto.getBuildingNum(), itemDto.getFloor());
+        if(buildingEntity == null){
+            return buildBuildingEntity(itemDto);
+        }
+        return buildingEntity;
     }
 
     public BargainDate buildBargainDate(BargainItemDto bargainItemDto){
@@ -51,8 +67,8 @@ public class DataWriteService {
 
     public RentDate buildRentDate(CharterAndRentItemDto charterAndRentItemDto){
         return new RentDate().builder().date(date).buildingEntity(buildingEntity)
-                .guaranteePrice(charterAndRentItemDto.getGuaranteePrice())
-                .monthlyPrice(charterAndRentItemDto.getMonthlyPrice()).build();
+                .guaranteePrice(charterAndRentItemDto.getGuaranteePrice().trim())
+                .monthlyPrice(charterAndRentItemDto.getMonthlyPrice().trim()).build();
     }
 
     public void setData(ItemDto itemDto) {

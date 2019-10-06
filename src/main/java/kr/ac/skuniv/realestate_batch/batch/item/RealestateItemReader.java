@@ -38,6 +38,7 @@ public class RealestateItemReader implements ItemReader<BuildingDealDto>, StepEx
     private Iterator<URI> uriIterator;
 
     private String currentUri;
+    @Value("#{jobParameters['requestDate']}")
     private String currentDate;
     private String currentRegionCode;
     private String currentBuildingType;
@@ -63,7 +64,7 @@ public class RealestateItemReader implements ItemReader<BuildingDealDto>, StepEx
         currentUri = (String) ctx.get(OpenApiContents.URL);
         currentBuildingType = (String) ctx.get(OpenApiContents.BUILDING_TYPE);
         currentDealType = (String) ctx.get(OpenApiContents.DEAL_TYPE);
-        currentDate = "201101";
+        //currentDate = "201101";
     }
 
     private URI getUri() {

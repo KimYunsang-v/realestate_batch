@@ -15,11 +15,15 @@ import javax.xml.bind.annotation.*;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class CharterAndRentItemDto extends ItemDto{
 
-    @XmlElement(name = "보증금액")
+    @XmlElements({
+        @XmlElement(name = "보증금액"),
+        @XmlElement(name = "보증금")
+    })
     private String guaranteePrice;
 
-    @XmlElement(name = "월세금액")
+    @XmlElements({
+            @XmlElement(name = "월세금액"),
+            @XmlElement(name = "월세")
+    })
     private String monthlyPrice;
-
-
 }

@@ -75,6 +75,7 @@ public class RealestateJobConfiguration extends DefaultBatchConfigurer {
         return stepBuilderFactory.get("apiCallStep").<BuildingDealDto, BuildingDealDto>chunk(12)
                 .reader(realestateItemReader)
                 .writer(realestateItemWriter)
+                .transactionManager(jpaTransactionManager())
                 .build();
     }
 

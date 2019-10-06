@@ -65,8 +65,6 @@ public class RealestateBatchApplicationTests {
         /*BufferedReader bf;
         bf = new BufferedReader(new InputStreamReader(url.openStream()));*/
 
-
-
         /*String line = "";
         String result = "";
 

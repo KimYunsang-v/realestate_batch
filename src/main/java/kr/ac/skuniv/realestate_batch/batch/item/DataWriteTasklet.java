@@ -1,7 +1,10 @@
 package kr.ac.skuniv.realestate_batch.batch.item;
 
 import com.google.gson.Gson;
+import kr.ac.skuniv.realestate_batch.domain.dto.BargainDto;
+import kr.ac.skuniv.realestate_batch.domain.dto.CharterAndRentDto;
 import kr.ac.skuniv.realestate_batch.domain.dto.openApiDto.BargainItemDto;
+import kr.ac.skuniv.realestate_batch.domain.dto.openApiDto.BuildingDealDto;
 import kr.ac.skuniv.realestate_batch.domain.dto.openApiDto.CharterAndRentItemDto;
 import kr.ac.skuniv.realestate_batch.domain.dto.openApiDto.ItemDto;
 import kr.ac.skuniv.realestate_batch.domain.entity.BargainDate;
@@ -39,8 +42,9 @@ import java.util.*;
 public class DataWriteTasklet implements Tasklet, StepExecutionListener, InitializingBean{
 
     private static final Gson gson = new Gson();
-    private final BuildingEntityRepository buildingRepository;
+    private final BuildingEntityRepository buildingEntityRepository;
     private final DataWriteService dataWriteService;
+    private List<? extends BuildingDealDto> saveItems;
 //    private final GoogleLocationApiService googleLocationApiService;
     @Value("${filePath}")
     private String filePath;
@@ -52,89 +56,40 @@ public class DataWriteTasklet implements Tasklet, StepExecutionListener, Initial
     @Override
     public void beforeStep(StepExecution stepExecution) {
         log.warn("beforeStep !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+
         ExecutionContext ctx = stepExecution.getExecutionContext();
-        fileName = (String) ctx.get(OpenApiContents.API_KIND);
-        log.warn("fileName => {}", fileName);
-        dealType = (String) ctx.get(OpenApiContents.DEAL_TYPE);
-        log.warn("dealType => {}", dealType);
-        buildingType = (String) ctx.get(OpenApiContents.BUILDING_TYPE);
-        log.warn("buildingType => {}", buildingType);
-
-        newDataList = new ArrayList<CharterAndRentItemDto>();
-        if (dealType.equals(OpenApiContents.BARGAIN_NUM)) {
-            newDataList = new ArrayList<BargainItemDto>();
-        }
-
-        String newFileFullPath = filePath + OpenApiContents.FILE_DELEMETER_WINDOWS + fileName;
-        try (
-                BufferedReader newBr = new BufferedReader(new FileReader(new File(newFileFullPath)))
-        ) {
-            loadDataList(newBr, newDataList);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void loadDataList(BufferedReader br, List list) throws IOException {
-        String line = null;
-        if (dealType.equals(OpenApiContents.BARGAIN_NUM)) {
-            while ((line = br.readLine()) != null) {
-                list.add(gson.fromJson(line.trim(), BargainItemDto.class));
-            }
-            return;
-        }
-        while ((line = br.readLine()) != null) {
-            //CharterAndRentItemDto charterWithRentItemDto = gson.fromJson(line.trim(), CharterAndRentItemDto.class);
-            list.add(gson.fromJson(line.trim(), CharterAndRentItemDto.class));
-        }
+        saveItems = (List<BuildingDealDto>) ctx.get("items");
     }
 
     @Transactional
-    void insertData(List newDataList) {
-
-        newDataList.forEach(item -> {
-            log.warn("insert item => {}", item.toString());
-            ItemDto itemDto = (ItemDto) item;
-            dataWriteService.setData(itemDto);
-            BuildingEntity buildingEntity = dataWriteService.buildBuildingEntity(itemDto);
-
-            // 매매일 경우
-            if(dealType.equals(OpenApiContents.BARGAIN_NUM)){
-                log.warn("매매!!");
-                BargainItemDto bargainItemDto = (BargainItemDto) item;
-
-                BargainDate bargainDate = dataWriteService.buildBargainDate(bargainItemDto);
-
-                buildingEntity.getBargainDates().add(bargainDate);
-
-                log.warn("insert building trade info => {}", buildingEntity.toString());
-                buildingRepository.save(buildingEntity);
-                return;
+    void insertData() {
+        for (BuildingDealDto saveItem : saveItems) {
+            if (saveItem.getDealType().equals(OpenApiContents.BARGAIN_NUM)) {
+                BargainDto bargainDto = (BargainDto) saveItem;
+                for (BargainItemDto bargainItemDto : bargainDto.getBody().getItem()) {
+                    dataWriteService.setData(bargainItemDto);
+                    //BuildingEntity buildingEntity = dataWriteService.getBuildingEntity(bargainItemDto.getBuildingNum(), bargainItemDto.getFloor());
+                    BargainDate bargainDate = dataWriteService.buildBargainDate(bargainItemDto);
+                    //buildingEntity.getBargainDates().add(bargainDate);
+                   // buildingEntityRepository.save(buildingEntity);
+                }
+            } else {
+                CharterAndRentDto charterAndRentDto = (CharterAndRentDto) saveItem;
+                for (CharterAndRentItemDto charterAndRentItemDto : charterAndRentDto.getBody().getItem()) {
+                    //BuildingEntity buildingEntity = dataWriteService.getBuildingEntity(charterAndRentItemDto.getBuildingNum(), charterAndRentItemDto.getFloor());
+                    dataWriteService.setData(charterAndRentItemDto);
+                    //월세
+                    if (Integer.parseInt(charterAndRentItemDto.getMonthlyPrice().trim()) != 0) {
+                       // buildingEntity.getRentDates().add(dataWriteService.buildRentDate(charterAndRentItemDto));
+                        //buildingEntityRepository.save(buildingEntity);
+                        return;
+                    }
+                    //buildingEntity.getCharterDates().add(dataWriteService.buildCharterDate(charterAndRentItemDto));
+                   //buildingEntityRepository.save(buildingEntity);
+                }
+                buildingEntityRepository.flush();
             }
-            // 전월세의 경우
-            CharterAndRentItemDto charterWithRentItemDto = (CharterAndRentItemDto) item;
-
-            log.warn("building create => {}", buildingEntity.toString());
-            if (Integer.parseInt(charterWithRentItemDto.getMonthlyPrice().trim()) != 0) {
-                log.warn("월세!!!");
-                // 월세
-                RentDate rentDate = dataWriteService.buildRentDate(charterWithRentItemDto);
-                buildingEntity.getRentDates().add(rentDate);
-                log.warn("insert building trade info => {}", buildingEntity.toString());
-                buildingRepository.save(buildingEntity);
-                return;
-            }
-            // 전세
-            log.warn("전세!!!");
-            CharterDate charterDate = dataWriteService.buildCharterDate(charterWithRentItemDto);
-            buildingEntity.getCharterDates().add(charterDate);
-            log.warn("insert building trade info => {}", buildingEntity.toString());
-            buildingRepository.save(buildingEntity);
-        });
-
-        buildingRepository.flush();
+        }
     }
 
     @Override
@@ -144,7 +99,7 @@ public class DataWriteTasklet implements Tasklet, StepExecutionListener, Initial
 
     @Override
     public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
-        insertData(newDataList);
+        insertData();
         return RepeatStatus.FINISHED;
     }
 

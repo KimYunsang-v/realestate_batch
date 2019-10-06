@@ -302,5 +302,4 @@ public final class OpenApiContents {
 //            {"50130", "50"},
 //            {"50110", "50"}
     }).collect(Collectors.toMap(kv -> kv[0], kv -> kv[1]));
-
 }
