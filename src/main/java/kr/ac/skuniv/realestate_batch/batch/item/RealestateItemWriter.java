@@ -33,6 +33,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -52,6 +53,7 @@ public class RealestateItemWriter implements ItemWriter<BuildingDealDto>, StepEx
     private String buildingType;
     private BuildingEntity buildingEntity;
     private List<? extends BuildingDealDto> saveItems;
+    private List<BuildingEntity> buildingEntities = new ArrayList<>();
 
     @Autowired
     private DataWriteService dataWriteService;
@@ -79,24 +81,36 @@ public class RealestateItemWriter implements ItemWriter<BuildingDealDto>, StepEx
             BargainDto bargainDto = (BargainDto) item;
             for (BargainItemDto bargainItemDto : bargainDto.getBody().getItem()){
                 dataWriteService.setData(bargainItemDto);
-                buildingEntity = dataWriteService.getBuildingEntity(bargainItemDto);
-                dataWriteService.setBuildingEntity(buildingEntity);
-                bargainDateRepository.save(dataWriteService.buildBargainDate(bargainItemDto));
+                buildingEntity = dataWriteService.buildBuildingEntity(bargainItemDto);
+                buildingEntity.getBargainDates().add(dataWriteService.buildBargainDate(bargainItemDto));
+                buildingEntities.add(buildingEntity);
+                //buildingEntityRepository.save(buildingEntity);
+                //buildingEntity = dataWriteService.getBuildingEntity(bargainItemDto);
+                //dataWriteService.setBuildingEntity(buildingEntity);
+                //bargainDateRepository.save(dataWriteService.buildBargainDate(bargainItemDto));
             }
         } else {
             CharterAndRentDto charterAndRentDto = (CharterAndRentDto) item;
-            log.warn(charterAndRentDto.toString());
+            //log.warn(charterAndRentDto.toString());
             for (CharterAndRentItemDto charterAndRentItemDto : charterAndRentDto.getBody().getItem()) {
                 dataWriteService.setData(charterAndRentItemDto);
-                buildingEntity = dataWriteService.getBuildingEntity(charterAndRentItemDto);
-                dataWriteService.setBuildingEntity(buildingEntity);
+                buildingEntity = dataWriteService.buildBuildingEntity(charterAndRentItemDto);
+                //buildingEntity = dataWriteService.getBuildingEntity(charterAndRentItemDto);
+                //dataWriteService.setBuildingEntity(buildingEntity);
                 if (Integer.parseInt(charterAndRentItemDto.getMonthlyPrice().trim()) != 0) {
-                    rentDateRepository.save(dataWriteService.buildRentDate(charterAndRentItemDto));
+                    buildingEntity.getRentDates().add(dataWriteService.buildRentDate(charterAndRentItemDto));
+                    buildingEntities.add(buildingEntity);
+                    //buildingEntityRepository.save(buildingEntity);
+                    //rentDateRepository.save(dataWriteService.buildRentDate(charterAndRentItemDto));
                     return;
                 }
-                charterDateRepository.save(dataWriteService.buildCharterDate(charterAndRentItemDto));
+                buildingEntity.getCharterDates().add(dataWriteService.buildCharterDate(charterAndRentItemDto));
+                buildingEntities.add(buildingEntity);
+                //buildingEntityRepository.save(buildingEntity);
+                //charterDateRepository.save(dataWriteService.buildCharterDate(charterAndRentItemDto));
             }
         }
+        buildingEntityRepository.saveAll(buildingEntities);
         buildingEntityRepository.flush();
     }
 
@@ -143,7 +157,7 @@ public class RealestateItemWriter implements ItemWriter<BuildingDealDto>, StepEx
     public void write(List<? extends BuildingDealDto> items) throws Exception {
         saveItems = items;
         for (BuildingDealDto item : items){
-            log.warn("item =======  " + item.toString());
+            //log.warn("item =======  " + item.toString());
             saveBuilding(item);
         }
     }

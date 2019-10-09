@@ -35,9 +35,9 @@ public class DataWriteService {
          buildingEntity =  new BuildingEntity().builder().city(city).groop(groop).dong(itemDto.getDong())
                 .name(itemDto.getName()).area(itemDto.getArea()).floor(itemDto.getFloor()).type(buildingType)
                 .buildingNum(itemDto.getBuildingNum()).constructYear(String.valueOf(itemDto.getConstructYear()))
-//                .bargainDates(new HashSet<BargainDate>())
-//                .charterDates(new HashSet<CharterDate>())
-//                .rentDates(new HashSet<RentDate>())
+                .bargainDates(new HashSet<BargainDate>())
+                .charterDates(new HashSet<CharterDate>())
+                .rentDates(new HashSet<RentDate>())
                 .build();
 
          setLocation();

@@ -16,7 +16,7 @@ public class RentDate {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "building_id")
     private BuildingEntity buildingEntity;
 

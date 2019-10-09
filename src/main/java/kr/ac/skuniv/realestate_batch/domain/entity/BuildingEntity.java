@@ -32,15 +32,15 @@ public class BuildingEntity {
 
     @Column(name = "building_num")
     private String buildingNum;
-//    @OneToMany(mappedBy = "buildingEntity", cascade = CascadeType.ALL, orphanRemoval = true)
-//    @JsonIgnore
-//    private Set<BargainDate> bargainDates = new HashSet<BargainDate>();
-//
-//    @OneToMany(mappedBy = "buildingEntity", cascade = CascadeType.ALL, orphanRemoval = true)
-//    @JsonIgnore
-//    private Set<CharterDate> charterDates = new HashSet<CharterDate>();
-//
-//    @OneToMany(mappedBy = "buildingEntity", cascade = CascadeType.ALL, orphanRemoval = true)
-//    @JsonIgnore
-//    private Set<RentDate> rentDates = new HashSet<RentDate>();
+    @OneToMany(mappedBy = "buildingEntity", cascade = CascadeType.PERSIST, orphanRemoval = true)
+    @JsonIgnore
+    private Set<BargainDate> bargainDates = new HashSet<BargainDate>();
+
+    @OneToMany(mappedBy = "buildingEntity", cascade = CascadeType.PERSIST, orphanRemoval = true)
+    @JsonIgnore
+    private Set<CharterDate> charterDates = new HashSet<CharterDate>();
+
+    @OneToMany(mappedBy = "buildingEntity", cascade = CascadeType.PERSIST, orphanRemoval = true)
+    @JsonIgnore
+    private Set<RentDate> rentDates = new HashSet<RentDate>();
 }
