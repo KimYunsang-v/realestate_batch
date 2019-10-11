@@ -69,11 +69,6 @@ public class RealestateItemWriter implements ItemWriter<BuildingDealDto>, StepEx
 
     int city, groop;
 
-//    private void write(BufferedWriter bw, String content) throws IOException {
-//        bw.write(content);
-//        bw.newLine();
-//    }
-
     @Transactional
     public void saveBuilding(BuildingDealDto item) {
 
@@ -84,63 +79,24 @@ public class RealestateItemWriter implements ItemWriter<BuildingDealDto>, StepEx
                 buildingEntity = dataWriteService.buildBuildingEntity(bargainItemDto);
                 buildingEntity.getBargainDates().add(dataWriteService.buildBargainDate(bargainItemDto));
                 buildingEntities.add(buildingEntity);
-                //buildingEntityRepository.save(buildingEntity);
-                //buildingEntity = dataWriteService.getBuildingEntity(bargainItemDto);
-                //dataWriteService.setBuildingEntity(buildingEntity);
-                //bargainDateRepository.save(dataWriteService.buildBargainDate(bargainItemDto));
             }
         } else {
             CharterAndRentDto charterAndRentDto = (CharterAndRentDto) item;
-            //log.warn(charterAndRentDto.toString());
             for (CharterAndRentItemDto charterAndRentItemDto : charterAndRentDto.getBody().getItem()) {
                 dataWriteService.setData(charterAndRentItemDto);
                 buildingEntity = dataWriteService.buildBuildingEntity(charterAndRentItemDto);
-                //buildingEntity = dataWriteService.getBuildingEntity(charterAndRentItemDto);
-                //dataWriteService.setBuildingEntity(buildingEntity);
                 if (Integer.parseInt(charterAndRentItemDto.getMonthlyPrice().trim()) != 0) {
                     buildingEntity.getRentDates().add(dataWriteService.buildRentDate(charterAndRentItemDto));
                     buildingEntities.add(buildingEntity);
-                    //buildingEntityRepository.save(buildingEntity);
-                    //rentDateRepository.save(dataWriteService.buildRentDate(charterAndRentItemDto));
                     return;
                 }
                 buildingEntity.getCharterDates().add(dataWriteService.buildCharterDate(charterAndRentItemDto));
                 buildingEntities.add(buildingEntity);
-                //buildingEntityRepository.save(buildingEntity);
-                //charterDateRepository.save(dataWriteService.buildCharterDate(charterAndRentItemDto));
             }
         }
         buildingEntityRepository.saveAll(buildingEntities);
         buildingEntityRepository.flush();
     }
-
-    /*@Transactional
-    public void saveDate(BuildingDealDto item){
-//        BuildingEntity buildingEntity = dataWriteService.getBuildingEntity(this.buildingEntity.getBuildingNum(), this.buildingEntity.getFloor());
-        if (item.getDealType().equals(OpenApiContents.BARGAIN_NUM)){
-            BargainDto bargainDto = (BargainDto) item;
-            for (BargainItemDto bargainItemDto : bargainDto.getBody().getItem()){
-                //buildingEntity.getBargainDates().add(dataWriteService.buildBargainDate(bargainItemDto));
-                bargainDateRepository.save(dataWriteService.buildBargainDate(bargainItemDto));
-                //buildingEntityRepository.save(buildingEntity);
-            }
-        } else {
-            CharterAndRentDto charterAndRentDto = (CharterAndRentDto) item;
-            for (CharterAndRentItemDto charterAndRentItemDto : charterAndRentDto.getBody().getItem()) {
-                //월세
-                if (Integer.parseInt(charterAndRentItemDto.getMonthlyPrice().trim()) != 0) {
-                    rentDateRepository.save(dataWriteService.buildRentDate(charterAndRentItemDto));
-//                    buildingEntity.getRentDates().add(dataWriteService.buildRentDate(charterAndRentItemDto));
-//                    buildingEntityRepository.save(buildingEntity);
-                    return;
-                }
-                //buildingEntity.getCharterDates().add(dataWriteService.buildCharterDate(charterAndRentItemDto));
-                charterDateRepository.save(dataWriteService.buildCharterDate(charterAndRentItemDto));
-                //buildingEntityRepository.save(buildingEntity);
-            }
-            buildingEntityRepository.flush();
-        }
-    }*/
 
     @Override
     public void beforeStep(StepExecution stepExecution) {
@@ -157,7 +113,6 @@ public class RealestateItemWriter implements ItemWriter<BuildingDealDto>, StepEx
     public void write(List<? extends BuildingDealDto> items) throws Exception {
         saveItems = items;
         for (BuildingDealDto item : items){
-            //log.warn("item =======  " + item.toString());
             saveBuilding(item);
         }
     }
