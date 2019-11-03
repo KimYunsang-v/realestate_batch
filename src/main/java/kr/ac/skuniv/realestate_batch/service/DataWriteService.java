@@ -58,17 +58,17 @@ public class DataWriteService {
         return new BargainDate().builder()
                 .date(date)
                 .buildingEntity(buildingEntity)
-                .price(bargainItemDto.getDealPrice().trim()).build();
+                .price(bargainItemDto.getDealPrice().trim().replaceAll("[^0-9?!\\.]","")).build();
     }
 
     public CharterDate buildCharterDate(CharterAndRentItemDto charterAndRentItemDto){
-        return new CharterDate().builder().date(date).buildingEntity(buildingEntity).price(charterAndRentItemDto.getGuaranteePrice().trim()).build();
+        return new CharterDate().builder().date(date).buildingEntity(buildingEntity).price(charterAndRentItemDto.getGuaranteePrice().trim().replaceAll("[^0-9?!\\.]","")).build();
     }
 
     public RentDate buildRentDate(CharterAndRentItemDto charterAndRentItemDto){
         return new RentDate().builder().date(date).buildingEntity(buildingEntity)
-                .guaranteePrice(charterAndRentItemDto.getGuaranteePrice().trim())
-                .monthlyPrice(charterAndRentItemDto.getMonthlyPrice().trim()).build();
+                .guaranteePrice(charterAndRentItemDto.getGuaranteePrice().trim().replaceAll("[^0-9?!\\.]",""))
+                .monthlyPrice(charterAndRentItemDto.getMonthlyPrice().trim().replaceAll("[^0-9?!\\.]","")).build();
     }
 
     public void setData(ItemDto itemDto) {

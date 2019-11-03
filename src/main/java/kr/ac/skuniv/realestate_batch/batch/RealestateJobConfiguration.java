@@ -61,14 +61,14 @@ public class RealestateJobConfiguration extends DefaultBatchConfigurer {
                 .build();
     }
 
-    @Bean
-    public Step dataWritePartitionStep()
-            throws UnexpectedInputException, ParseException {
-        return stepBuilderFactory.get("dataWritePartitionStep")
-                .partitioner("dataWritePartitionStep", realestatePartitioner)
-                .step(DataWriteStep())
-                .build();
-    }
+//    @Bean
+//    public Step dataWritePartitionStep()
+//            throws UnexpectedInputException, ParseException {
+//        return stepBuilderFactory.get("dataWritePartitionStep")
+//                .partitioner("dataWritePartitionStep", realestatePartitioner)
+//                .step(DataWriteStep())
+//                .build();
+//    }
 
     @Bean
     public Step apiCallStep() {
@@ -79,14 +79,14 @@ public class RealestateJobConfiguration extends DefaultBatchConfigurer {
                 .build();
     }
 
-    @Bean
-    @Transactional
-    public Step DataWriteStep() {
-        return stepBuilderFactory.get("DataWriteStep")
-                .transactionManager(jpaTransactionManager())
-                .tasklet(dataWriteTasklet)
-                .build();
-    }
+//    @Bean
+//    @Transactional
+//    public Step DataWriteStep() {
+//        return stepBuilderFactory.get("DataWriteStep")
+//                .transactionManager(jpaTransactionManager())
+//                .tasklet(dataWriteTasklet)
+//                .build();
+//    }
 
     @Bean
     @Primary

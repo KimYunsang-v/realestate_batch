@@ -71,7 +71,7 @@ public class RealestateItemWriter implements ItemWriter<BuildingDealDto>, StepEx
 
     @Transactional
     public void saveBuilding(BuildingDealDto item) {
-
+        long start = System.currentTimeMillis();
         if (item.getDealType().equals(OpenApiContents.BARGAIN_NUM)){
             BargainDto bargainDto = (BargainDto) item;
             for (BargainItemDto bargainItemDto : bargainDto.getBody().getItem()){
@@ -94,8 +94,10 @@ public class RealestateItemWriter implements ItemWriter<BuildingDealDto>, StepEx
                 buildingEntities.add(buildingEntity);
             }
         }
-        buildingEntityRepository.saveAll(buildingEntities);
-        buildingEntityRepository.flush();
+
+        long end = System.currentTimeMillis();
+
+//        log.warn("1개 building save" + (end-start)/1000 +" 초 걸림");
     }
 
     @Override
@@ -103,8 +105,6 @@ public class RealestateItemWriter implements ItemWriter<BuildingDealDto>, StepEx
         ExecutionContext ctx = stepExecution.getExecutionContext();
         dealType = (String) ctx.get(OpenApiContents.DEAL_TYPE);
         buildingType = (String) ctx.get(OpenApiContents.BUILDING_TYPE);
-
-        log.warn("deal type = " + dealType + "  building type = " + buildingType);
         fileName = (String) ctx.get(OpenApiContents.API_KIND);
         dataWriteService.setBuildingType(buildingType);
     }
@@ -112,9 +112,19 @@ public class RealestateItemWriter implements ItemWriter<BuildingDealDto>, StepEx
     @Override
     public void write(List<? extends BuildingDealDto> items) throws Exception {
         saveItems = items;
+        long start = System.currentTimeMillis();
+
         for (BuildingDealDto item : items){
             saveBuilding(item);
         }
+        log.warn("deal type = " + dealType + "  building type = " + buildingType + "entity count = " + buildingEntities.size());
+        buildingEntityRepository.saveAll(buildingEntities);
+        buildingEntityRepository.flush();
+        buildingEntities.clear();
+
+        long end = System.currentTimeMillis();
+
+        log.warn("1개 url save" + (end-start)/1000 +" 초 걸림");
     }
 
     @Override

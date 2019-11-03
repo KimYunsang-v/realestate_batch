@@ -44,6 +44,7 @@ public class RealestateItemReader implements ItemReader<BuildingDealDto>, StepEx
     private String currentBuildingType;
     private String currentDealType;
 
+
     @Override
     public void beforeStep(StepExecution stepExecution) {
         ExecutionContext ctx = stepExecution.getExecutionContext();
@@ -89,6 +90,8 @@ public class RealestateItemReader implements ItemReader<BuildingDealDto>, StepEx
 
     @Override
     public BuildingDealDto read() throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
+        long start = System.currentTimeMillis();
+
         while(uriIterator.hasNext()){
             if (currentDealType.equals(OpenApiContents.BARGAIN_NUM)){
                 URI uri = uriIterator.next();
@@ -101,6 +104,10 @@ public class RealestateItemReader implements ItemReader<BuildingDealDto>, StepEx
             setBuildingWithDeal(charterAndRentDto);
             return charterAndRentDto;
         }
+
+        long end = System.currentTimeMillis();
+
+        log.warn("1개 url read" + (end-start)/1000 +" 초 걸림");
         return null;
     }
 
