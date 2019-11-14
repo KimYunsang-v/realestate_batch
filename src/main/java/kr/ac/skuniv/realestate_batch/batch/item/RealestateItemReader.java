@@ -44,7 +44,6 @@ public class RealestateItemReader implements ItemReader<BuildingDealDto>, StepEx
     private String currentBuildingType;
     private String currentDealType;
 
-
     @Override
     public void beforeStep(StepExecution stepExecution) {
         ExecutionContext ctx = stepExecution.getExecutionContext();
