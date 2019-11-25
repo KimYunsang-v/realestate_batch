@@ -24,4 +24,6 @@ public class CharterDate {
     private Date date;
 
     private String price;
+
+    private Double pyPrice;
 }

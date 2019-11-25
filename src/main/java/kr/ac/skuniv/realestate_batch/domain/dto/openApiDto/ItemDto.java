@@ -36,7 +36,12 @@ public class ItemDto {
     @XmlElement(name = "일")
     private String days;
 
-    @XmlElement(name = "전용면적")
+
+    @XmlElements({
+            @XmlElement(name = "전용면적"),
+            @XmlElement(name = "대지면적"),
+            @XmlElement(name = "계약면적"),
+    })
     private Double area;
 
     @XmlElement(name = "지번")

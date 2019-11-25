@@ -28,5 +28,4 @@ public class RentDate {
 
     @Column(name = "monthly_price")
     private String monthlyPrice;
-
 }

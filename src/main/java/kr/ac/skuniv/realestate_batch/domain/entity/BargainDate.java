@@ -24,4 +24,6 @@ public class BargainDate {
     private Date date;
 
     private String price;
+
+    private Double pyPrice;
 }

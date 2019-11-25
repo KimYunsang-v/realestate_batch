@@ -13,6 +13,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,7 @@ import java.util.HashSet;
 
 @Service
 @Setter
+@Log4j2
 public class DataWriteService {
 
     private int city, groop;
@@ -55,20 +57,29 @@ public class DataWriteService {
     }
 
     public BargainDate buildBargainDate(BargainItemDto bargainItemDto){
+        String price = bargainItemDto.getDealPrice().trim().replaceAll("[^0-9?!\\.]","");
+//        Double pyPrice = getPyPrice(bargainItemDto.getArea(), price);
         return new BargainDate().builder()
                 .date(date)
                 .buildingEntity(buildingEntity)
-                .price(bargainItemDto.getDealPrice().trim().replaceAll("[^0-9?!\\.]","")).build();
+                .price(price)
+                .pyPrice(getPyPrice(buildingEntity.getArea(), price)).build();
     }
 
     public CharterDate buildCharterDate(CharterAndRentItemDto charterAndRentItemDto){
-        return new CharterDate().builder().date(date).buildingEntity(buildingEntity).price(charterAndRentItemDto.getGuaranteePrice().trim().replaceAll("[^0-9?!\\.]","")).build();
+        String price = charterAndRentItemDto.getGuaranteePrice().trim().replaceAll("[^0-9?!\\.]","");
+        return new CharterDate().builder().date(date).buildingEntity(buildingEntity).price(price)
+                .pyPrice(getPyPrice(buildingEntity.getArea(), price))
+                .build();
     }
 
     public RentDate buildRentDate(CharterAndRentItemDto charterAndRentItemDto){
+        String price = charterAndRentItemDto.getMonthlyPrice().trim().replaceAll("[^0-9?!\\.]","");
         return new RentDate().builder().date(date).buildingEntity(buildingEntity)
                 .guaranteePrice(charterAndRentItemDto.getGuaranteePrice().trim().replaceAll("[^0-9?!\\.]",""))
-                .monthlyPrice(charterAndRentItemDto.getMonthlyPrice().trim().replaceAll("[^0-9?!\\.]","")).build();
+                .monthlyPrice(price)
+//                .pyPrice(getPyPrice(buildingEntity.getArea(), price))
+                .build();
     }
 
     public void setData(ItemDto itemDto) {
@@ -76,6 +87,15 @@ public class DataWriteService {
         city = Integer.parseInt(itemDto.getRegionCode().substring(0,2));
         groop = Integer.parseInt(itemDto.getRegionCode().substring(2));
         date = new GregorianCalendar(itemDto.getYear(), itemDto.getMonthly() - 1, Integer.parseInt(itemDto.getDays())).getTime();
+    }
+
+    private Double getPyPrice(Double area, String price) {
+        double py = 3.3;
+        if(area == null) {
+            return null;
+        }
+        double buildingPy = area / py;
+        return Double.valueOf(price) / buildingPy;
     }
 
     public void setLocation() {

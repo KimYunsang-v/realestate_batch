@@ -82,16 +82,17 @@ public class RealestateItemWriter implements ItemWriter<BuildingDealDto>, StepEx
             }
         } else {
             CharterAndRentDto charterAndRentDto = (CharterAndRentDto) item;
+//            log.warn("charter write size = "  + charterAndRentDto.getBody().getItem().size());
             for (CharterAndRentItemDto charterAndRentItemDto : charterAndRentDto.getBody().getItem()) {
                 dataWriteService.setData(charterAndRentItemDto);
                 buildingEntity = dataWriteService.buildBuildingEntity(charterAndRentItemDto);
-                if (Integer.parseInt(charterAndRentItemDto.getMonthlyPrice().trim()) != 0) {
+                if (Integer.parseInt(charterAndRentItemDto.getMonthlyPrice().trim().replaceAll("[^0-9?!\\.]","")) == 0) {
+                    buildingEntity.getCharterDates().add(dataWriteService.buildCharterDate(charterAndRentItemDto));
+                    buildingEntities.add(buildingEntity);
+                }else {
                     buildingEntity.getRentDates().add(dataWriteService.buildRentDate(charterAndRentItemDto));
                     buildingEntities.add(buildingEntity);
-                    return;
                 }
-                buildingEntity.getCharterDates().add(dataWriteService.buildCharterDate(charterAndRentItemDto));
-                buildingEntities.add(buildingEntity);
             }
         }
 

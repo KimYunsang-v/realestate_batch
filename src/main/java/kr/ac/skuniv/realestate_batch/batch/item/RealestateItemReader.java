@@ -32,14 +32,14 @@ import java.util.*;
 @PropertySource("classpath:serviceKey.yaml")
 public class RealestateItemReader implements ItemReader<BuildingDealDto>, StepExecutionListener {
 
-    @Value("${serviceKey}")
+    @Value("${serviceKeyGun}")
     private String serviceKey;
     private final RestTemplate restTemplate;
     private Iterator<URI> uriIterator;
 
     private String currentUri;
-    @Value("#{jobParameters['requestDate']}")
-    private String currentDate;
+//    @Value("#{jobParameters['requestDate']}")
+    private String currentDate="201910";
     private String currentRegionCode;
     private String currentBuildingType;
     private String currentDealType;
@@ -50,12 +50,19 @@ public class RealestateItemReader implements ItemReader<BuildingDealDto>, StepEx
         List<URI> uris = new ArrayList<>();
         Iterator<String> regionCodeIterator = OpenApiContents.regionMap.keySet().iterator();
 
+        Iterator<String> dateIterator = OpenApiContents.dateMap.iterator();
+
         setVariable(ctx);
         List<URI> urlList = new ArrayList<>();
 
         while(regionCodeIterator.hasNext()) {
             currentRegionCode = regionCodeIterator.next();
             urlList.add(getUri());
+//            while(dateIterator.hasNext()){
+//
+//                currentDate = dateIterator.next();
+//
+//            }
         }
         uriIterator = urlList.iterator();
     }
@@ -100,6 +107,7 @@ public class RealestateItemReader implements ItemReader<BuildingDealDto>, StepEx
             }
             URI uri = uriIterator.next();
             CharterAndRentDto charterAndRentDto = restTemplate.getForObject(uri, CharterAndRentDto.class);
+//            log.warn("charter read size = " + charterAndRentDto.getBody().getItem().size());
             setBuildingWithDeal(charterAndRentDto);
             return charterAndRentDto;
         }

@@ -1,11 +1,11 @@
 package kr.ac.skuniv.realestate_batch.batch;
 
 
-import kr.ac.skuniv.realestate_batch.batch.item.DataWriteTasklet;
-import kr.ac.skuniv.realestate_batch.batch.item.RealestateItemReader;
-import kr.ac.skuniv.realestate_batch.batch.item.RealestateItemWriter;
-import kr.ac.skuniv.realestate_batch.batch.item.RealestatePartitioner;
+import kr.ac.skuniv.realestate_batch.batch.item.*;
 import kr.ac.skuniv.realestate_batch.domain.dto.openApiDto.BuildingDealDto;
+import kr.ac.skuniv.realestate_batch.domain.entity.BargainDate;
+import kr.ac.skuniv.realestate_batch.domain.entity.BuildingEntity;
+import kr.ac.skuniv.realestate_batch.domain.entity.CharterDate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.*;
@@ -41,50 +41,24 @@ public class RealestateJobConfiguration extends DefaultBatchConfigurer {
     private final RealestateItemWriter realestateItemWriter;
     private final RealestatePartitioner realestatePartitioner;
 
+
+    private final PyItemReader pyItemReader;
+    private final PyItemWriter pyItemWriter;
+
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
     private final JobLauncher jobLauncher;
+
 
     private final DataSource dataSource;
     private Integer startYear = 2019;
     private Integer startMonth = 2;
 
-//    @Scheduled(fixedRate = 5000 )
-//    public void getData() {
-//        try {
-////            String stringParam = String.valueOf(startYear) + "0" +String.valueOf(startMonth);
-////            Long curruntParam = Long.valueOf(stringParam);
-//            List<Integer> year = new ArrayList<>();
-//
-//            JobParameters jobParameters = new JobParametersBuilder().addLong(
-//                    "requestDate", Long.valueOf(201904)).addLong(
-//                    "requestDate", Long.valueOf(201905)).toJobParameters();
-//            jobLauncher.run(apiCallJob(), jobParameters);
-//            System.out.println("I have been scheduled with Spring scheduler");
-////            --startMonth;
-////            if(startMonth == 0){
-////                return;
-////            }
-////            if(startMonth == 0) {
-////                --startYear;
-////                startMonth = 12;
-////            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
-
-
     @Bean
     public Job apiCallJob() {
         log.warn("----------api call job");
-//        return jobBuilderFactory.get("apiCallJob")
-//                .incrementer(new RunIdIncrementer()).listener(listener())
-//                .flow(apiCallPartitionStep()).end().build();
-
         return jobBuilderFactory.get("apiCallJob")
                 .start(apiCallPartitionStep())
-                //.next(dataWritePartitionStep())
                 .build();
     }
 
@@ -97,15 +71,6 @@ public class RealestateJobConfiguration extends DefaultBatchConfigurer {
                 .build();
     }
 
-//    @Bean
-//    public Step dataWritePartitionStep()
-//            throws UnexpectedInputException, ParseException {
-//        return stepBuilderFactory.get("dataWritePartitionStep")
-//                .partitioner("dataWritePartitionStep", realestatePartitioner)
-//                .step(DataWriteStep())
-//                .build();
-//    }
-
     @Bean
     public Step apiCallStep() {
         return stepBuilderFactory.get("apiCallStep").<BuildingDealDto, BuildingDealDto>chunk(12)
@@ -115,24 +80,35 @@ public class RealestateJobConfiguration extends DefaultBatchConfigurer {
                 .build();
     }
 
-//    @Bean
-//    @Transactional
-//    public Step DataWriteStep() {
-//        return stepBuilderFactory.get("DataWriteStep")
-//                .transactionManager(jpaTransactionManager())
-//                .tasklet(dataWriteTasklet)
-//                .build();
-//    }
     @Bean
     public JobExecutionListener listener() {
         return new JobListener();
     }
+
+
     @Bean
     @Primary
     public JpaTransactionManager jpaTransactionManager() {
         final JpaTransactionManager transactionManager = new JpaTransactionManager();
         transactionManager.setDataSource(dataSource);
         return transactionManager;
+    }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//    @Bean
+//    public Job apiCallJob() {
+//        log.warn("----------api call job");
+//        return jobBuilderFactory.get("apiCallJob")
+//                .start(apiCallStep2())
+//                .build();
+//    }
+
+    @Bean
+    public Step apiCallStep2() {
+        return stepBuilderFactory.get("apiCallStep2").<List<CharterDate>, List<CharterDate>>chunk(1)
+                .reader(pyItemReader)
+                .writer(pyItemWriter)
+                .transactionManager(jpaTransactionManager())
+                .build();
     }
 
 //    private JpaItemWriter<Building> writer() {
