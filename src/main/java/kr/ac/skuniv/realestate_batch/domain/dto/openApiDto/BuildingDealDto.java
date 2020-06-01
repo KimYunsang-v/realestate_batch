@@ -1,5 +1,7 @@
 package kr.ac.skuniv.realestate_batch.domain.dto.openApiDto;
 
+import java.util.Date;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,4 +15,5 @@ public abstract class BuildingDealDto {
     private String buildingType;
     private String dealType;
     private String apiKind;
+    private Date date;
 }

@@ -1,14 +1,12 @@
 package kr.ac.skuniv.realestate_batch.configuration;
 
-
-import com.mysql.cj.jdbc.MysqlXADataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.Environment;
 
-import javax.sql.DataSource;
+import com.mysql.jdbc.jdbc2.optional.MysqlXADataSource;
 
 @Configuration
 public class DBConfiguration {
@@ -23,7 +21,7 @@ public class DBConfiguration {
      */
     @Bean(name = "mainDataSource")
     @Primary
-    public DataSource mainDataSource() {
+    public MysqlXADataSource mainDataSource() {
 
         final String user = this.env.getProperty("spring.datasource.username");
         final String password = this.env.getProperty("spring.datasource.password");

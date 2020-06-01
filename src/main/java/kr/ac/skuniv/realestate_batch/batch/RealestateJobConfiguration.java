@@ -41,10 +41,6 @@ public class RealestateJobConfiguration extends DefaultBatchConfigurer {
     private final RealestateItemWriter realestateItemWriter;
     private final RealestatePartitioner realestatePartitioner;
 
-
-    private final PyItemReader pyItemReader;
-    private final PyItemWriter pyItemWriter;
-
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
     private final JobLauncher jobLauncher;
@@ -85,7 +81,6 @@ public class RealestateJobConfiguration extends DefaultBatchConfigurer {
         return new JobListener();
     }
 
-
     @Bean
     @Primary
     public JpaTransactionManager jpaTransactionManager() {
@@ -102,14 +97,14 @@ public class RealestateJobConfiguration extends DefaultBatchConfigurer {
 //                .build();
 //    }
 
-    @Bean
-    public Step apiCallStep2() {
-        return stepBuilderFactory.get("apiCallStep2").<List<CharterDate>, List<CharterDate>>chunk(1)
-                .reader(pyItemReader)
-                .writer(pyItemWriter)
-                .transactionManager(jpaTransactionManager())
-                .build();
-    }
+    // @Bean
+    // public Step apiCallStep2() {
+    //     return stepBuilderFactory.get("apiCallStep2").<List<CharterDate>, List<CharterDate>>chunk(1)
+    //             .reader(pyItemReader)
+    //             .writer(pyItemWriter)
+    //             .transactionManager(jpaTransactionManager())
+    //             .build();
+    // }
 
 //    private JpaItemWriter<Building> writer() {
 //        JpaItemWriter<Building> writer =  new JpaItemWriter<>();

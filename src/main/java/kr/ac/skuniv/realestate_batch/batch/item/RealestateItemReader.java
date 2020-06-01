@@ -5,6 +5,7 @@ import kr.ac.skuniv.realestate_batch.domain.dto.CharterAndRentDto;
 import kr.ac.skuniv.realestate_batch.domain.dto.openApiDto.BuildingDealDto;
 import kr.ac.skuniv.realestate_batch.util.OpenApiContents;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.StepExecution;
@@ -32,7 +33,7 @@ import java.util.*;
 @PropertySource("classpath:serviceKey.yaml")
 public class RealestateItemReader implements ItemReader<BuildingDealDto>, StepExecutionListener {
 
-    @Value("${serviceKeyGun}")
+    @Value("${serviceKey}")
     private String serviceKey;
     private final RestTemplate restTemplate;
     private Iterator<URI> uriIterator;
@@ -44,71 +45,44 @@ public class RealestateItemReader implements ItemReader<BuildingDealDto>, StepEx
     private String currentBuildingType;
     private String currentDealType;
 
+    @SneakyThrows
     @Override
     public void beforeStep(StepExecution stepExecution) {
         ExecutionContext ctx = stepExecution.getExecutionContext();
-        List<URI> uris = new ArrayList<>();
         Iterator<String> regionCodeIterator = OpenApiContents.regionMap.keySet().iterator();
 
-        Iterator<String> dateIterator = OpenApiContents.dateMap.iterator();
+        currentUri = (String) ctx.get(OpenApiContents.URL);
+        currentBuildingType = (String) ctx.get(OpenApiContents.BUILDING_TYPE);
+        currentDealType = (String) ctx.get(OpenApiContents.DEAL_TYPE);
 
-        setVariable(ctx);
         List<URI> urlList = new ArrayList<>();
 
         while(regionCodeIterator.hasNext()) {
             currentRegionCode = regionCodeIterator.next();
-            urlList.add(getUri());
-//            while(dateIterator.hasNext()){
-//
-//                currentDate = dateIterator.next();
-//
-//            }
+            StringBuilder sb = new StringBuilder();
+            urlList.add(new URI(
+                sb.append(String.format(currentUri, serviceKey, currentRegionCode, currentDate)).toString()
+            ));
         }
+
         uriIterator = urlList.iterator();
     }
 
-    private void setVariable(ExecutionContext ctx) {
-        currentUri = (String) ctx.get(OpenApiContents.URL);
-        currentBuildingType = (String) ctx.get(OpenApiContents.BUILDING_TYPE);
-        currentDealType = (String) ctx.get(OpenApiContents.DEAL_TYPE);
-        //currentDate = "201101";
-    }
-
-    private URI getUri() {
-        StringBuilder sb = new StringBuilder();
-        URI resultUri;
-        try {
-            resultUri = new URI(
-                    sb.append(String.format(currentUri, serviceKey, currentRegionCode, currentDate)).toString()
-            );
-            log.warn(resultUri.toString());
-            return resultUri;
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    private void setBuildingWithDeal(BuildingDealDto buildingDealDto) {
-        buildingDealDto.setDealType(currentDealType);
-        buildingDealDto.setBuildingType(currentBuildingType);
-    }
-
     @Override
-    public BuildingDealDto read() throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
+    public BuildingDealDto read()  {
         long start = System.currentTimeMillis();
 
         while(uriIterator.hasNext()){
             if (currentDealType.equals(OpenApiContents.BARGAIN_NUM)){
                 URI uri = uriIterator.next();
                 BargainDto bargainDto = restTemplate.getForObject(uri, BargainDto.class);
-                setBuildingWithDeal(bargainDto);
+                bargainDto.setDealType(currentDealType);
                 return bargainDto;
             }
             URI uri = uriIterator.next();
             CharterAndRentDto charterAndRentDto = restTemplate.getForObject(uri, CharterAndRentDto.class);
-//            log.warn("charter read size = " + charterAndRentDto.getBody().getItem().size());
-            setBuildingWithDeal(charterAndRentDto);
+            charterAndRentDto.setDealType(currentDealType);
+            charterAndRentDto.setBuildingType(currentBuildingType);
             return charterAndRentDto;
         }
 
@@ -120,7 +94,6 @@ public class RealestateItemReader implements ItemReader<BuildingDealDto>, StepEx
 
     @Override
     public ExitStatus afterStep(StepExecution stepExecution) {
-
         return null;
     }
 }

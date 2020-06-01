@@ -29,9 +29,8 @@ public class BuildingEntity {
     private String constructYear;
     private String latitude;
     private String longitude;
-
-    @Column(name = "building_num")
     private String buildingNum;
+
     @OneToMany(mappedBy = "buildingEntity", cascade = CascadeType.PERSIST, orphanRemoval = true)
     @JsonIgnore
     private Set<BargainDate> bargainDates = new HashSet<BargainDate>();

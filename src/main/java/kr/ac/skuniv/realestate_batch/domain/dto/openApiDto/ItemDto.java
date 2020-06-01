@@ -1,6 +1,8 @@
 package kr.ac.skuniv.realestate_batch.domain.dto.openApiDto;
 
 
+import java.util.Date;
+
 import lombok.*;
 
 import javax.xml.bind.annotation.XmlAccessType;

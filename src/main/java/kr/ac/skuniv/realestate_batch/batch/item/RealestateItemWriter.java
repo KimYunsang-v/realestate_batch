@@ -13,6 +13,7 @@ import kr.ac.skuniv.realestate_batch.repository.BuildingEntityRepository;
 import kr.ac.skuniv.realestate_batch.repository.CharterDateRepository;
 import kr.ac.skuniv.realestate_batch.repository.RentDateRepository;
 import kr.ac.skuniv.realestate_batch.service.DataWriteService;
+import kr.ac.skuniv.realestate_batch.util.CommonFunction;
 import kr.ac.skuniv.realestate_batch.util.OpenApiContents;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -55,44 +56,21 @@ public class RealestateItemWriter implements ItemWriter<BuildingDealDto>, StepEx
     private List<? extends BuildingDealDto> saveItems;
     private List<BuildingEntity> buildingEntities = new ArrayList<>();
 
-    @Autowired
-    private DataWriteService dataWriteService;
-    @Autowired
-    private BuildingEntityRepository buildingEntityRepository;
-    @Autowired
-    private CharterDateRepository charterDateRepository;
-
-    @Autowired
-    private BargainDateRepository bargainDateRepository;
-    @Autowired
-    private RentDateRepository rentDateRepository;
-
-    int city, groop;
+    private final DataWriteService dataWriteService;
+    private final BuildingEntityRepository buildingEntityRepository;
 
     @Transactional
     public void saveBuilding(BuildingDealDto item) {
         long start = System.currentTimeMillis();
         if (item.getDealType().equals(OpenApiContents.BARGAIN_NUM)){
             BargainDto bargainDto = (BargainDto) item;
-            for (BargainItemDto bargainItemDto : bargainDto.getBody().getItem()){
-                dataWriteService.setData(bargainItemDto);
-                buildingEntity = dataWriteService.buildBuildingEntity(bargainItemDto);
-                buildingEntity.getBargainDates().add(dataWriteService.buildBargainDate(bargainItemDto));
-                buildingEntities.add(buildingEntity);
+            for (BargainItemDto bargainItemDto : bargainDto.getBody().getItem()) {
+                buildingEntities.add(dataWriteService.addNewBargainDate(bargainItemDto, buildingType));
             }
         } else {
             CharterAndRentDto charterAndRentDto = (CharterAndRentDto) item;
-//            log.warn("charter write size = "  + charterAndRentDto.getBody().getItem().size());
             for (CharterAndRentItemDto charterAndRentItemDto : charterAndRentDto.getBody().getItem()) {
-                dataWriteService.setData(charterAndRentItemDto);
-                buildingEntity = dataWriteService.buildBuildingEntity(charterAndRentItemDto);
-                if (Integer.parseInt(charterAndRentItemDto.getMonthlyPrice().trim().replaceAll("[^0-9?!\\.]","")) == 0) {
-                    buildingEntity.getCharterDates().add(dataWriteService.buildCharterDate(charterAndRentItemDto));
-                    buildingEntities.add(buildingEntity);
-                }else {
-                    buildingEntity.getRentDates().add(dataWriteService.buildRentDate(charterAndRentItemDto));
-                    buildingEntities.add(buildingEntity);
-                }
+                buildingEntities.add(dataWriteService.addNewCharterDateOrRentDate(charterAndRentItemDto, buildingType));
             }
         }
 
@@ -103,11 +81,11 @@ public class RealestateItemWriter implements ItemWriter<BuildingDealDto>, StepEx
 
     @Override
     public void beforeStep(StepExecution stepExecution) {
+        log.info("before step");
         ExecutionContext ctx = stepExecution.getExecutionContext();
         dealType = (String) ctx.get(OpenApiContents.DEAL_TYPE);
         buildingType = (String) ctx.get(OpenApiContents.BUILDING_TYPE);
         fileName = (String) ctx.get(OpenApiContents.API_KIND);
-        dataWriteService.setBuildingType(buildingType);
     }
 
     @Override
@@ -115,7 +93,7 @@ public class RealestateItemWriter implements ItemWriter<BuildingDealDto>, StepEx
         saveItems = items;
         long start = System.currentTimeMillis();
 
-        for (BuildingDealDto item : items){
+        for (BuildingDealDto item : items) {
             saveBuilding(item);
         }
         log.warn("deal type = " + dealType + "  building type = " + buildingType + "entity count = " + buildingEntities.size());
@@ -125,11 +103,12 @@ public class RealestateItemWriter implements ItemWriter<BuildingDealDto>, StepEx
 
         long end = System.currentTimeMillis();
 
-        log.warn("1개 url save" + (end-start)/1000 +" 초 걸림");
+        log.warn("1개 url save  " + (end-start)/1000 +" 초 걸림");
     }
 
     @Override
     public ExitStatus afterStep(StepExecution stepExecution) {
+        log.info("after step");
         return ExitStatus.COMPLETED;
     }
 
