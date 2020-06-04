@@ -18,6 +18,7 @@ import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.Date;
@@ -72,7 +73,7 @@ public class DataWriteService {
                 .buildingEntity(buildingEntity).price(guaranteePrice)
                 .pyPrice(getPyPrice(buildingEntity.getArea(), guaranteePrice))
                 .build());
-        }else{
+        } else {
             buildingEntity.getRentDates().add(
                 new RentDate().builder()
                     .date(CommonFunction.getDate(charterAndRentItemDto))
@@ -84,20 +85,6 @@ public class DataWriteService {
 
         return buildingEntity;
     }
-
-    // public BuildingEntity addNewRentDate(CharterAndRentItemDto charterAndRentItemDto, String buildingType){
-    //     String price = CommonFunction.removeMoneyBlank(charterAndRentItemDto.getMonthlyPrice());
-    //     BuildingEntity buildingEntity = getBuildingEntity(charterAndRentItemDto, buildingType);
-    //     buildingEntity.getRentDates().add(
-    //         new RentDate().builder()
-    //         .date(CommonFunction.getDate(charterAndRentItemDto))
-    //         .buildingEntity(buildingEntity)
-    //         .guaranteePrice(CommonFunction.removeMoneyBlank(charterAndRentItemDto.getGuaranteePrice()))
-    //         .monthlyPrice(price)
-    //         .build());
-    //
-    //     return buildingEntity;
-    // }
 
     private Double getPyPrice(Double area, String price) {
         double py = 3.3;

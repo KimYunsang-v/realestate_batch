@@ -43,12 +43,8 @@ public class RealestateJobConfiguration extends DefaultBatchConfigurer {
 
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
-    private final JobLauncher jobLauncher;
-
 
     private final DataSource dataSource;
-    private Integer startYear = 2019;
-    private Integer startMonth = 2;
 
     @Bean
     public Job apiCallJob() {
@@ -88,35 +84,4 @@ public class RealestateJobConfiguration extends DefaultBatchConfigurer {
         transactionManager.setDataSource(dataSource);
         return transactionManager;
     }
-////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//    @Bean
-//    public Job apiCallJob() {
-//        log.warn("----------api call job");
-//        return jobBuilderFactory.get("apiCallJob")
-//                .start(apiCallStep2())
-//                .build();
-//    }
-
-    // @Bean
-    // public Step apiCallStep2() {
-    //     return stepBuilderFactory.get("apiCallStep2").<List<CharterDate>, List<CharterDate>>chunk(1)
-    //             .reader(pyItemReader)
-    //             .writer(pyItemWriter)
-    //             .transactionManager(jpaTransactionManager())
-    //             .build();
-    // }
-
-//    private JpaItemWriter<Building> writer() {
-//        JpaItemWriter<Building> writer =  new JpaItemWriter<>();
-//        writer.setEntityManagerFactory(entityManagerFactory);
-//        return writer;
-//    }
-
-//    @Bean
-//    @Primary
-//    public JpaTransactionManager jpaTransactionManager() {
-//        final JpaTransactionManager transactionManager = new JpaTransactionManager();
-//        transactionManager.setDataSource(dataSource);
-//        return transactionManager;
-//    }
 }
