@@ -1,4 +1,4 @@
-package kr.ac.skuniv.realestate_batch.domain.dto.openApiDto;
+package kr.ac.skuniv.realestate_batch.domain.dto.abstractDto;
 
 import java.util.Date;
 

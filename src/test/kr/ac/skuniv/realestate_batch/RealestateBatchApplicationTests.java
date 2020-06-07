@@ -1,6 +1,5 @@
 package kr.ac.skuniv.realestate_batch;
 
-import kr.ac.skuniv.realestate_batch.domain.dto.openApiDto.NaverLocationDto;
 import kr.ac.skuniv.realestate_batch.util.OpenApiContents;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;

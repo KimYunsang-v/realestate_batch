@@ -11,7 +11,7 @@ import java.util.Map;
 
 @Slf4j
 @Component
-public class RealestatePartitioner implements Partitioner {
+public class RealEstatePartitioner implements Partitioner {
 
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {

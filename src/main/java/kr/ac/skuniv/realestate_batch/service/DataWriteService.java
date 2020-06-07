@@ -3,28 +3,19 @@ package kr.ac.skuniv.realestate_batch.service;
 
 import kr.ac.skuniv.realestate_batch.domain.dto.openApiDto.BargainItemDto;
 import kr.ac.skuniv.realestate_batch.domain.dto.openApiDto.CharterAndRentItemDto;
-import kr.ac.skuniv.realestate_batch.domain.dto.openApiDto.ItemDto;
+import kr.ac.skuniv.realestate_batch.domain.dto.abstractDto.ItemDto;
 import kr.ac.skuniv.realestate_batch.domain.entity.BargainDate;
 import kr.ac.skuniv.realestate_batch.domain.entity.BuildingEntity;
 import kr.ac.skuniv.realestate_batch.domain.entity.CharterDate;
 import kr.ac.skuniv.realestate_batch.domain.entity.RentDate;
 import kr.ac.skuniv.realestate_batch.repository.BuildingEntityRepository;
 import kr.ac.skuniv.realestate_batch.util.CommonFunction;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.util.Date;
-import java.util.GregorianCalendar;
+import org.springframework.stereotype.Service;
+
 import java.util.HashSet;
-import java.util.function.Supplier;
 
 @Service
 @Log4j2

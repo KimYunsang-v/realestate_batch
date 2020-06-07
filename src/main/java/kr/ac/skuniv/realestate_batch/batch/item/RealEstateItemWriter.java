@@ -4,16 +4,11 @@ import com.google.gson.Gson;
 import kr.ac.skuniv.realestate_batch.domain.dto.BargainDto;
 import kr.ac.skuniv.realestate_batch.domain.dto.CharterAndRentDto;
 import kr.ac.skuniv.realestate_batch.domain.dto.openApiDto.BargainItemDto;
-import kr.ac.skuniv.realestate_batch.domain.dto.openApiDto.BuildingDealDto;
+import kr.ac.skuniv.realestate_batch.domain.dto.abstractDto.BuildingDealDto;
 import kr.ac.skuniv.realestate_batch.domain.dto.openApiDto.CharterAndRentItemDto;
-import kr.ac.skuniv.realestate_batch.domain.dto.openApiDto.ItemDto;
 import kr.ac.skuniv.realestate_batch.domain.entity.BuildingEntity;
-import kr.ac.skuniv.realestate_batch.repository.BargainDateRepository;
 import kr.ac.skuniv.realestate_batch.repository.BuildingEntityRepository;
-import kr.ac.skuniv.realestate_batch.repository.CharterDateRepository;
-import kr.ac.skuniv.realestate_batch.repository.RentDateRepository;
 import kr.ac.skuniv.realestate_batch.service.DataWriteService;
-import kr.ac.skuniv.realestate_batch.util.CommonFunction;
 import kr.ac.skuniv.realestate_batch.util.OpenApiContents;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,16 +19,12 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,7 +33,7 @@ import java.util.List;
 @Configuration
 @RequiredArgsConstructor
 @PropertySource("classpath:serviceKey.yaml")
-public class RealestateItemWriter implements ItemWriter<BuildingDealDto>, StepExecutionListener, InitializingBean {
+public class RealEstateItemWriter implements ItemWriter<List<BuildingDealDto>>, StepExecutionListener, InitializingBean {
 
     private static final Gson gson = new Gson();
 
@@ -53,7 +44,7 @@ public class RealestateItemWriter implements ItemWriter<BuildingDealDto>, StepEx
     private String dealType;
     private String buildingType;
     private BuildingEntity buildingEntity;
-    private List<? extends BuildingDealDto> saveItems;
+    private List<? extends List<BuildingDealDto>> saveItems;
     private List<BuildingEntity> buildingEntities = new ArrayList<>();
 
     private final DataWriteService dataWriteService;
@@ -89,17 +80,17 @@ public class RealestateItemWriter implements ItemWriter<BuildingDealDto>, StepEx
     }
 
     @Override
-    public void write(List<? extends BuildingDealDto> items) throws Exception {
+    public void write(List<? extends List<BuildingDealDto>> items) throws Exception {
         saveItems = items;
         long start = System.currentTimeMillis();
 
-        for (BuildingDealDto item : items) {
-            saveBuilding(item);
-        }
-        log.warn("deal type = " + dealType + "  building type = " + buildingType + "entity count = " + buildingEntities.size());
-        buildingEntityRepository.saveAll(buildingEntities);
-        buildingEntityRepository.flush();
-        buildingEntities.clear();
+        // for (BuildingDealDto item : items) {
+        //     saveBuilding(item);
+        // }
+        // log.warn("deal type = " + dealType + "  building type = " + buildingType + "entity count = " + buildingEntities.size());
+        // buildingEntityRepository.saveAll(buildingEntities);
+        // buildingEntityRepository.flush();
+        // buildingEntities.clear();
 
         long end = System.currentTimeMillis();
 

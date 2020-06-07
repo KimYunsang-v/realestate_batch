@@ -3,7 +3,7 @@ package kr.ac.skuniv.realestate_batch.util;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
-import kr.ac.skuniv.realestate_batch.domain.dto.openApiDto.ItemDto;
+import kr.ac.skuniv.realestate_batch.domain.dto.abstractDto.ItemDto;
 
 public final class CommonFunction {
 

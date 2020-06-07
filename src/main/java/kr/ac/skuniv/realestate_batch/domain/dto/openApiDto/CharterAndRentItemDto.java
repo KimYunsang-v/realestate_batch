@@ -1,5 +1,6 @@
 package kr.ac.skuniv.realestate_batch.domain.dto.openApiDto;
 
+import kr.ac.skuniv.realestate_batch.domain.dto.abstractDto.ItemDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,7 +14,7 @@ import javax.xml.bind.annotation.*;
 @NoArgsConstructor
 @XmlRootElement(name = "item")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class CharterAndRentItemDto extends ItemDto{
+public class CharterAndRentItemDto extends ItemDto {
 
     @XmlElements({
         @XmlElement(name = "보증금액"),

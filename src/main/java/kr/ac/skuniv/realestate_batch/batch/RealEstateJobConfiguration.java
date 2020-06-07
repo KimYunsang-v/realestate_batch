@@ -1,11 +1,10 @@
 package kr.ac.skuniv.realestate_batch.batch;
 
 
+import java.util.List;
+
 import kr.ac.skuniv.realestate_batch.batch.item.*;
-import kr.ac.skuniv.realestate_batch.domain.dto.openApiDto.BuildingDealDto;
-import kr.ac.skuniv.realestate_batch.domain.entity.BargainDate;
-import kr.ac.skuniv.realestate_batch.domain.entity.BuildingEntity;
-import kr.ac.skuniv.realestate_batch.domain.entity.CharterDate;
+import kr.ac.skuniv.realestate_batch.domain.dto.abstractDto.BuildingDealDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.*;
@@ -13,33 +12,25 @@ import org.springframework.batch.core.configuration.annotation.DefaultBatchConfi
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
-import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.ParseException;
 import org.springframework.batch.item.UnexpectedInputException;
-import org.springframework.batch.item.database.JpaItemWriter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
-import java.util.ArrayList;
-import java.util.List;
 
 @Slf4j
 @Configuration
 @EnableBatchProcessing
 @RequiredArgsConstructor
-public class RealestateJobConfiguration extends DefaultBatchConfigurer {
+public class RealEstateJobConfiguration extends DefaultBatchConfigurer {
 
-    private final RealestateItemReader realestateItemReader;
-    private final RealestateItemWriter realestateItemWriter;
-    private final RealestatePartitioner realestatePartitioner;
+    private final RealEstateItemReader realEstateItemReader;
+    private final RealEstateItemWriter realEstateItemWriter;
+    private final RealEstateProcessor realEstateProcessor;
+    private final RealEstatePartitioner realEstatePartitioner;
 
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
@@ -58,16 +49,17 @@ public class RealestateJobConfiguration extends DefaultBatchConfigurer {
     public Step apiCallPartitionStep()
             throws UnexpectedInputException, ParseException {
         return stepBuilderFactory.get("apiCallPartitionStep")
-                .partitioner("apiCallPartitionStep", realestatePartitioner)
+                .partitioner("apiCallPartitionStep", realEstatePartitioner)
                 .step(apiCallStep())
                 .build();
     }
 
     @Bean
     public Step apiCallStep() {
-        return stepBuilderFactory.get("apiCallStep").<BuildingDealDto, BuildingDealDto>chunk(12)
-                .reader(realestateItemReader)
-                .writer(realestateItemWriter)
+        return stepBuilderFactory.get("apiCallStep").<List<BuildingDealDto>, List<BuildingDealDto>>chunk(5)
+                .reader(realEstateItemReader)
+                .processor(realEstateProcessor)
+                .writer(realEstateItemWriter)
                 .transactionManager(jpaTransactionManager())
                 .build();
     }

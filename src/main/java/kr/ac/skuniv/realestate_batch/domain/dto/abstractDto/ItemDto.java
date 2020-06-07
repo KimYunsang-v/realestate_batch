@@ -1,4 +1,4 @@
-package kr.ac.skuniv.realestate_batch.domain.dto.openApiDto;
+package kr.ac.skuniv.realestate_batch.domain.dto.abstractDto;
 
 
 import java.util.Date;
@@ -14,7 +14,7 @@ import javax.xml.bind.annotation.XmlElements;
 @NoArgsConstructor
 @Data
 @XmlAccessorType(XmlAccessType.FIELD)
-public class ItemDto {
+public abstract class ItemDto {
 
     @XmlElement(name = "건축년도")
     private int constructYear;
