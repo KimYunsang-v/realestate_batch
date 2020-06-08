@@ -61,7 +61,7 @@ public class RealEstateJobConfiguration extends DefaultBatchConfigurer {
 
     @Bean
     public Step apiCallStep() {
-        return stepBuilderFactory.get("apiCallStep").<BuildingDealDto, BuildingDealDto>chunk(2)
+        return stepBuilderFactory.get("apiCallStep").<BuildingDealDto, BuildingDealDto>chunk(5)
                 .reader(realEstateItemReader)
                 .writer(realEstateItemWriter)
                 .transactionManager(jpaTransactionManager())
@@ -83,6 +83,6 @@ public class RealEstateJobConfiguration extends DefaultBatchConfigurer {
 
     @Bean
     public TaskExecutor taskExecutor(){
-        return new SimpleAsyncTaskExecutor("spring_batch");
+        return new SimpleAsyncTaskExecutor("batch_partitioner_");
     }
 }

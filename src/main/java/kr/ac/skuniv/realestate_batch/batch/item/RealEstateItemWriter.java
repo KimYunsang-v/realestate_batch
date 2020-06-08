@@ -42,7 +42,7 @@ public class RealEstateItemWriter implements ItemWriter<BuildingDealDto>, StepEx
     private final SaleRepository saleRepository;
 
     public void getEntity(BuildingDealDto item) {
-        if(item.getDealType().equals(OpenApiContents.BARGAIN_NUM)){
+        if(item.getDealType().equals(OpenApiContents.SALE_NUM)){
             SaleDto saleDto  = (SaleDto) item;
             for (SaleItemDto saleItemDto : saleDto.getBody().getItem()) {
                 Sale sale = dataWriteService.createSaleEntity(saleItemDto);
@@ -69,13 +69,12 @@ public class RealEstateItemWriter implements ItemWriter<BuildingDealDto>, StepEx
 
         items.stream().forEach(this::getEntity);
 
-        log.info("writer after step  " + sales.size());
-        log.info("writer after step  " + rents.size());
+        log.info("Writer start.  The size to write = " + (sales.size() + rents.size()));
         saleRepository.saveAll(sales);
         rentRepository.saveAll(rents);
 
         long end = System.currentTimeMillis();
-        log.warn("1개 url save  " + (end-start)/1000 +" 초 걸림");
+        log.warn((end-start)/1000 +" seconds to write");
     }
 
     @Override

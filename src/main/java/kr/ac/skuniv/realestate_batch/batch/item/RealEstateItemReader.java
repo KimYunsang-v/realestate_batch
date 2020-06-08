@@ -37,9 +37,8 @@ public class RealEstateItemReader implements ItemReader<BuildingDealDto>, StepEx
     private List<URI> urlList;
 
     private String currentUri;
-//    @Value("#{jobParameters['requestDate']}")
-    private String currentDate="201910";
-    private String currentRegionCode;
+   @Value("#{jobParameters['requestDate']}")
+    private String currentDate;
     private String currentBuildingType;
     private String currentDealType;
 
@@ -65,7 +64,7 @@ public class RealEstateItemReader implements ItemReader<BuildingDealDto>, StepEx
             }
         });
 
-        log.info("read before step " + urlList.size());
+        log.info("Reader start. The number of urls is " + urlList.size());
         uriIterator = urlList.iterator();
     }
 
@@ -76,7 +75,7 @@ public class RealEstateItemReader implements ItemReader<BuildingDealDto>, StepEx
         BuildingDealDto buildingDealDto;
 
         while(uriIterator.hasNext()){
-            if (currentDealType.equals(OpenApiContents.BARGAIN_NUM)){
+            if (currentDealType.equals(OpenApiContents.SALE_NUM)){
                 URI uri = uriIterator.next();
                 SaleDto saleDto = restTemplate.getForObject(uri, SaleDto.class);
                 saleDto.setDealType(currentDealType);
@@ -93,7 +92,7 @@ public class RealEstateItemReader implements ItemReader<BuildingDealDto>, StepEx
         }
 
         long end = System.currentTimeMillis();
-        log.warn("1개 url read" + (end-start)/1000 +" 초 걸림");
+        log.warn((end-start)/1000 +" seconds to read");
         return null;
     }
 
