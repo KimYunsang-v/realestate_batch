@@ -15,6 +15,7 @@ public class RealEstatePartitioner implements Partitioner {
 
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
+        log.info("grid size -------- " + gridSize);
         Map<String, ExecutionContext> map = new HashMap<>();
         int i = 0;
         for (OpenApiContents.OpenApiRequest myEnum : OpenApiContents.OpenApiRequest.values()) {

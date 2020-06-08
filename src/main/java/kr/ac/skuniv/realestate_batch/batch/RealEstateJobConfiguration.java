@@ -14,6 +14,8 @@ import org.springframework.batch.item.UnexpectedInputException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.orm.jpa.JpaTransactionManager;
 
 import kr.ac.skuniv.realestate_batch.batch.item.RealEstateItemReader;
@@ -50,9 +52,11 @@ public class RealEstateJobConfiguration extends DefaultBatchConfigurer {
     public Step apiCallPartitionStep()
             throws UnexpectedInputException, ParseException {
         return stepBuilderFactory.get("apiCallPartitionStep")
-                .partitioner("apiCallPartitionStep", realEstatePartitioner)
-                .step(apiCallStep())
-                .build();
+            .partitioner("apiCallPartitionStep", realEstatePartitioner)
+            .step(apiCallStep())
+            .gridSize(6)
+            .taskExecutor(taskExecutor())
+            .build();
     }
 
     @Bean
@@ -75,5 +79,10 @@ public class RealEstateJobConfiguration extends DefaultBatchConfigurer {
         final JpaTransactionManager transactionManager = new JpaTransactionManager();
         transactionManager.setDataSource(dataSource);
         return transactionManager;
+    }
+
+    @Bean
+    public TaskExecutor taskExecutor(){
+        return new SimpleAsyncTaskExecutor("spring_batch");
     }
 }

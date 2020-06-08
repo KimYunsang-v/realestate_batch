@@ -1,14 +1,14 @@
 package kr.ac.skuniv.realestate_batch.domain.dto.abstractDto;
 
-
-import java.util.Date;
-
-import lombok.*;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElements;
+
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @ToString
 @NoArgsConstructor
