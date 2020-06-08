@@ -74,7 +74,7 @@ public class RealEstateItemWriter implements ItemWriter<BuildingDealDto>, StepEx
         rentRepository.saveAll(rents);
 
         long end = System.currentTimeMillis();
-        log.warn((end-start)/1000 +" seconds to write");
+        log.info((end-start)/1000 +" seconds to write");
     }
 
     @Override
