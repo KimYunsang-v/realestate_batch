@@ -1,7 +1,7 @@
 package kr.ac.skuniv.realestate_batch.batch.item;
 
-import kr.ac.skuniv.realestate_batch.domain.dto.BargainDto;
-import kr.ac.skuniv.realestate_batch.domain.dto.CharterAndRentDto;
+import kr.ac.skuniv.realestate_batch.domain.dto.SaleDto;
+import kr.ac.skuniv.realestate_batch.domain.dto.RentDto;
 import kr.ac.skuniv.realestate_batch.domain.dto.abstractDto.BuildingDealDto;
 import kr.ac.skuniv.realestate_batch.util.OpenApiContents;
 import lombok.RequiredArgsConstructor;
@@ -28,12 +28,12 @@ import java.util.*;
 @StepScope
 @RequiredArgsConstructor
 @PropertySource("classpath:serviceKey.yaml")
-public class RealEstateItemReader implements ItemReader<List<BuildingDealDto>>, StepExecutionListener {
+public class RealEstateItemReader implements ItemReader<BuildingDealDto>, StepExecutionListener {
 
     @Value("${serviceKey}")
     private String serviceKey;
     private final RestTemplate restTemplate;
-    // private Iterator<URI> uriIterator;
+    private Iterator<URI> uriIterator;
     private List<URI> urlList;
 
     private String currentUri;
@@ -65,61 +65,36 @@ public class RealEstateItemReader implements ItemReader<List<BuildingDealDto>>, 
             }
         });
 
-        // while(regionCodeIterator.hasNext()) {
-        //     currentRegionCode = regionCodeIterator.next();
-        //     StringBuilder sb = new StringBuilder();
-        //     urlList.add(new URI(
-        //         sb.append(String.format(currentUri, serviceKey, currentRegionCode, currentDate)).toString()
-        //     ));
-        // }
-
-        // uriIterator = urlList.iterator();
+        log.info("read before step " + urlList.size());
+        uriIterator = urlList.iterator();
     }
 
     @Override
-    public List<BuildingDealDto> read()  {
+    public BuildingDealDto read()  {
         long start = System.currentTimeMillis();
 
-        List<BuildingDealDto> buildingDealDtos = new ArrayList<>();
+        BuildingDealDto buildingDealDto;
 
-        if(currentDealType.equals(OpenApiContents.BARGAIN_NUM)){
-            urlList.stream().iterator().forEachRemaining(uri -> {
-                BargainDto bargainDto = restTemplate.getForObject(uri, BargainDto.class);
-                bargainDto.setDealType(currentDealType);
-                bargainDto.setBuildingType(currentBuildingType);
-                buildingDealDtos.add(bargainDto);
-            });
-        } else {
-            urlList.stream().iterator().forEachRemaining(uri -> {
-                CharterAndRentDto charterAndRentDto = restTemplate.getForObject(uri, CharterAndRentDto.class);
-                charterAndRentDto.setDealType(currentDealType);
-                charterAndRentDto.setBuildingType(currentBuildingType);
-                buildingDealDtos.add(charterAndRentDto);
-            });
+        while(uriIterator.hasNext()){
+            if (currentDealType.equals(OpenApiContents.BARGAIN_NUM)){
+                URI uri = uriIterator.next();
+                SaleDto saleDto = restTemplate.getForObject(uri, SaleDto.class);
+                saleDto.setDealType(currentDealType);
+                saleDto.setBuildingType(currentBuildingType);
+                buildingDealDto = saleDto;
+                return buildingDealDto;
+            }
+            URI uri = uriIterator.next();
+            RentDto rentDto = restTemplate.getForObject(uri, RentDto.class);
+            rentDto.setDealType(currentDealType);
+            rentDto.setBuildingType(currentBuildingType);
+            buildingDealDto = rentDto;
+            return buildingDealDto;
         }
 
-        // urlList.stream().map(url -> {
-        //
-        // })
-
-        // while(uriIterator.hasNext()){
-        //     if (currentDealType.equals(OpenApiContents.BARGAIN_NUM)){
-        //         URI uri = uriIterator.next();
-        //         BargainDto bargainDto = restTemplate.getForObject(uri, BargainDto.class);
-        //         bargainDto.setDealType(currentDealType);
-        //         buildingDealDtos.add(bargainDto);
-        //     }
-        //     URI uri = uriIterator.next();
-        //     CharterAndRentDto charterAndRentDto = restTemplate.getForObject(uri, CharterAndRentDto.class);
-        //     charterAndRentDto.setDealType(currentDealType);
-        //     charterAndRentDto.setBuildingType(currentBuildingType);
-        //     buildingDealDtos.add(charterAndRentDto);
-        // }
-
         long end = System.currentTimeMillis();
-
         log.warn("1개 url read" + (end-start)/1000 +" 초 걸림");
-        return buildingDealDtos;
+        return null;
     }
 
     @Override

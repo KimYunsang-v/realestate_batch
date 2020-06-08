@@ -1,80 +1,56 @@
 package kr.ac.skuniv.realestate_batch.service;
 
 
-import kr.ac.skuniv.realestate_batch.domain.dto.openApiDto.BargainItemDto;
-import kr.ac.skuniv.realestate_batch.domain.dto.openApiDto.CharterAndRentItemDto;
-import kr.ac.skuniv.realestate_batch.domain.dto.abstractDto.ItemDto;
-import kr.ac.skuniv.realestate_batch.domain.entity.BargainDate;
-import kr.ac.skuniv.realestate_batch.domain.entity.BuildingEntity;
-import kr.ac.skuniv.realestate_batch.domain.entity.CharterDate;
-import kr.ac.skuniv.realestate_batch.domain.entity.RentDate;
-import kr.ac.skuniv.realestate_batch.repository.BuildingEntityRepository;
+import kr.ac.skuniv.realestate_batch.domain.dto.openApiDto.RentItemDto;
+import kr.ac.skuniv.realestate_batch.domain.dto.openApiDto.SaleItemDto;
+import kr.ac.skuniv.realestate_batch.domain.entity.Rent;
+import kr.ac.skuniv.realestate_batch.domain.entity.Sale;
 import kr.ac.skuniv.realestate_batch.util.CommonFunction;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-
 @Service
 @Log4j2
 @RequiredArgsConstructor
 public class DataWriteService {
 
-    private final BuildingEntityRepository buildingEntityRepository;
-
-    public BuildingEntity getBuildingEntity(ItemDto itemDto, String buildingType){
-        int city = Integer.parseInt(itemDto.getRegionCode().substring(0,2));
-        int groop = Integer.parseInt(itemDto.getRegionCode().substring(2));
-
-        return buildingEntityRepository.findByCityAndGroopAndBuildingNumAndFloor(city, groop, itemDto.getBuildingNum(), itemDto.getFloor())
-            .orElseGet(() -> new BuildingEntity().builder()
-                .city(city).groop(groop).dong(itemDto.getDong())
-                .name(itemDto.getName()).area(itemDto.getArea())
-                .floor(itemDto.getFloor()).type(buildingType)
-                .buildingNum(itemDto.getBuildingNum())
-                .constructYear(String.valueOf(itemDto.getConstructYear()))
-                .bargainDates(new HashSet<>())
-                .charterDates(new HashSet<>())
-                .rentDates(new HashSet<>())
-                .build());
-    }
-
-    public BuildingEntity addNewBargainDate(BargainItemDto bargainItemDto, String buildingType){
-        String price = bargainItemDto.getDealPrice().trim().replaceAll("[^0-9?!\\.]","");
-        BuildingEntity buildingEntity = getBuildingEntity(bargainItemDto, buildingType);
-        buildingEntity.getBargainDates().add(new BargainDate().builder()
-            .date(CommonFunction.getDate(bargainItemDto))
-            .buildingEntity(buildingEntity)
+    public Sale createSaleEntity(SaleItemDto saleItemDto) {
+        String price = CommonFunction.removeMoneyBlank(saleItemDto.getDealPrice());
+        return Sale.builder()
+            .area(saleItemDto.getArea())
+            .date(CommonFunction.getDate(saleItemDto))
+            .name(saleItemDto.getName())
+            .city(CommonFunction.getCityCode(saleItemDto.getRegionCode()))
+            .groop(CommonFunction.getGroopCode(saleItemDto.getRegionCode()))
+            .dong(saleItemDto.getDong())
             .price(price)
-            .pyPrice(getPyPrice(buildingEntity.getArea(), price)).build());
-
-        return buildingEntity;
+            .pyPrice(getPyPrice(saleItemDto.getArea(), price))
+            .build();
     }
 
-    public BuildingEntity addNewCharterDateOrRentDate(CharterAndRentItemDto charterAndRentItemDto, String buildingType){
-        String guaranteePrice = CommonFunction.removeMoneyBlank(charterAndRentItemDto.getGuaranteePrice());
-        String monthlyPrice = CommonFunction.removeMoneyBlank(charterAndRentItemDto.getMonthlyPrice());
-        BuildingEntity buildingEntity = getBuildingEntity(charterAndRentItemDto, buildingType);
-
-        if(Integer.parseInt(monthlyPrice) == 0){
-            buildingEntity.getCharterDates().add(new CharterDate().builder()
-                .date(CommonFunction.getDate(charterAndRentItemDto))
-                .buildingEntity(buildingEntity).price(guaranteePrice)
-                .pyPrice(getPyPrice(buildingEntity.getArea(), guaranteePrice))
-                .build());
-        } else {
-            buildingEntity.getRentDates().add(
-                new RentDate().builder()
-                    .date(CommonFunction.getDate(charterAndRentItemDto))
-                    .buildingEntity(buildingEntity)
-                    .guaranteePrice(CommonFunction.removeMoneyBlank(charterAndRentItemDto.getGuaranteePrice()))
-                    .monthlyPrice(monthlyPrice)
-                    .build());
+    public Rent createRentEntity(RentItemDto rentItemDto) {
+        String guaranteePrice = CommonFunction.removeMoneyBlank(rentItemDto.getGuaranteePrice());
+        String monthlyPrice = CommonFunction.removeMoneyBlank(rentItemDto.getMonthlyPrice());
+        if(Integer.parseInt(monthlyPrice) != 0){
+            guaranteePrice = changeMonthlyPriceToGuaranteePrice(guaranteePrice, monthlyPrice);
         }
 
-        return buildingEntity;
+        return Rent.builder()
+            .area(rentItemDto.getArea())
+            .date(CommonFunction.getDate(rentItemDto))
+            .name(rentItemDto.getName())
+            .city(CommonFunction.getCityCode(rentItemDto.getRegionCode()))
+            .groop(CommonFunction.getGroopCode(rentItemDto.getRegionCode()))
+            .dong(rentItemDto.getDong())
+            .price(guaranteePrice)
+            .pyPrice(getPyPrice(rentItemDto.getArea(), guaranteePrice))
+            .build();
+    }
+
+    private String changeMonthlyPriceToGuaranteePrice (String guaranteePrice, String monthlyPrice){
+        return (Integer.parseInt(guaranteePrice) + (Integer.parseInt(monthlyPrice) * 100)) + "";
     }
 
     private Double getPyPrice(Double area, String price) {

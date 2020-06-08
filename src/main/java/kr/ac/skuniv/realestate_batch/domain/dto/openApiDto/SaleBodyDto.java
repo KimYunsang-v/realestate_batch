@@ -1,5 +1,6 @@
 package kr.ac.skuniv.realestate_batch.domain.dto.openApiDto;
 
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,15 +11,15 @@ import java.util.List;
 
 @Getter
 @Setter
-@ToString
 @NoArgsConstructor
+@ToString
 @XmlRootElement(name = "body")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class CharterAndRentBodyDto {
+public class SaleBodyDto {
 
     @XmlElementWrapper(name = "items")
     @XmlElement(name = "item")
-    private List<CharterAndRentItemDto> item;
+    private List<SaleItemDto> item;
 
     @XmlElement(name = "numOfRows")
     private int numOfRows;

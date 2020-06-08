@@ -1,110 +1,85 @@
 package kr.ac.skuniv.realestate_batch.batch.item;
 
-import com.google.gson.Gson;
-import kr.ac.skuniv.realestate_batch.domain.dto.BargainDto;
-import kr.ac.skuniv.realestate_batch.domain.dto.CharterAndRentDto;
-import kr.ac.skuniv.realestate_batch.domain.dto.openApiDto.BargainItemDto;
-import kr.ac.skuniv.realestate_batch.domain.dto.abstractDto.BuildingDealDto;
-import kr.ac.skuniv.realestate_batch.domain.dto.openApiDto.CharterAndRentItemDto;
-import kr.ac.skuniv.realestate_batch.domain.entity.BuildingEntity;
-import kr.ac.skuniv.realestate_batch.repository.BuildingEntityRepository;
-import kr.ac.skuniv.realestate_batch.service.DataWriteService;
-import kr.ac.skuniv.realestate_batch.util.OpenApiContents;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.core.configuration.annotation.StepScope;
-import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.io.BufferedWriter;
-import java.util.ArrayList;
-import java.util.List;
+import kr.ac.skuniv.realestate_batch.domain.dto.RentDto;
+import kr.ac.skuniv.realestate_batch.domain.dto.SaleDto;
+import kr.ac.skuniv.realestate_batch.domain.dto.abstractDto.BuildingDealDto;
+import kr.ac.skuniv.realestate_batch.domain.dto.openApiDto.RentItemDto;
+import kr.ac.skuniv.realestate_batch.domain.dto.openApiDto.SaleItemDto;
+import kr.ac.skuniv.realestate_batch.domain.entity.Rent;
+import kr.ac.skuniv.realestate_batch.domain.entity.Sale;
+import kr.ac.skuniv.realestate_batch.repository.RentRepository;
+import kr.ac.skuniv.realestate_batch.repository.SaleRepository;
+import kr.ac.skuniv.realestate_batch.service.DataWriteService;
+import kr.ac.skuniv.realestate_batch.util.OpenApiContents;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @StepScope
 @Configuration
 @RequiredArgsConstructor
 @PropertySource("classpath:serviceKey.yaml")
-public class RealEstateItemWriter implements ItemWriter<List<BuildingDealDto>>, StepExecutionListener, InitializingBean {
+public class RealEstateItemWriter implements ItemWriter<BuildingDealDto>, StepExecutionListener {
 
-    private static final Gson gson = new Gson();
-
-    private String fileName;
-    @Value("${filePath}")
-    private String filePath;
-    private BufferedWriter bufferedWriter;
-    private String dealType;
-    private String buildingType;
-    private BuildingEntity buildingEntity;
-    private List<? extends List<BuildingDealDto>> saveItems;
-    private List<BuildingEntity> buildingEntities = new ArrayList<>();
+    private List<Sale> sales = new ArrayList<>();
+    private List<Rent> rents = new ArrayList<>();
 
     private final DataWriteService dataWriteService;
-    private final BuildingEntityRepository buildingEntityRepository;
 
-    @Transactional
-    public void saveBuilding(BuildingDealDto item) {
-        long start = System.currentTimeMillis();
-        if (item.getDealType().equals(OpenApiContents.BARGAIN_NUM)){
-            BargainDto bargainDto = (BargainDto) item;
-            for (BargainItemDto bargainItemDto : bargainDto.getBody().getItem()) {
-                buildingEntities.add(dataWriteService.addNewBargainDate(bargainItemDto, buildingType));
+    private final RentRepository rentRepository;
+    private final SaleRepository saleRepository;
+
+    public void getEntity(BuildingDealDto item) {
+        if(item.getDealType().equals(OpenApiContents.BARGAIN_NUM)){
+            SaleDto saleDto  = (SaleDto) item;
+            for (SaleItemDto saleItemDto : saleDto.getBody().getItem()) {
+                Sale sale = dataWriteService.createSaleEntity(saleItemDto);
+                sale.setType(item.getBuildingType());
+                sales.add(sale);
             }
         } else {
-            CharterAndRentDto charterAndRentDto = (CharterAndRentDto) item;
-            for (CharterAndRentItemDto charterAndRentItemDto : charterAndRentDto.getBody().getItem()) {
-                buildingEntities.add(dataWriteService.addNewCharterDateOrRentDate(charterAndRentItemDto, buildingType));
+            RentDto rentDto = (RentDto) item;
+            for (RentItemDto rentItemDto : rentDto.getBody().getItem()) {
+                Rent rent = dataWriteService.createRentEntity(rentItemDto);
+                rent.setType(item.getBuildingType());
+                rents.add(rent);
             }
         }
-
-        long end = System.currentTimeMillis();
-
-//        log.warn("1개 building save" + (end-start)/1000 +" 초 걸림");
     }
 
     @Override
     public void beforeStep(StepExecution stepExecution) {
-        log.info("before step");
-        ExecutionContext ctx = stepExecution.getExecutionContext();
-        dealType = (String) ctx.get(OpenApiContents.DEAL_TYPE);
-        buildingType = (String) ctx.get(OpenApiContents.BUILDING_TYPE);
-        fileName = (String) ctx.get(OpenApiContents.API_KIND);
     }
 
     @Override
-    public void write(List<? extends List<BuildingDealDto>> items) throws Exception {
-        saveItems = items;
+    public void write(List<? extends BuildingDealDto> items) {
         long start = System.currentTimeMillis();
 
-        // for (BuildingDealDto item : items) {
-        //     saveBuilding(item);
-        // }
-        // log.warn("deal type = " + dealType + "  building type = " + buildingType + "entity count = " + buildingEntities.size());
-        // buildingEntityRepository.saveAll(buildingEntities);
-        // buildingEntityRepository.flush();
-        // buildingEntities.clear();
+        items.stream().forEach(this::getEntity);
+
+        log.info("writer after step  " + sales.size());
+        log.info("writer after step  " + rents.size());
+        saleRepository.saveAll(sales);
+        rentRepository.saveAll(rents);
 
         long end = System.currentTimeMillis();
-
         log.warn("1개 url save  " + (end-start)/1000 +" 초 걸림");
     }
 
     @Override
     public ExitStatus afterStep(StepExecution stepExecution) {
-        log.info("after step");
         return ExitStatus.COMPLETED;
-    }
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-
     }
 }

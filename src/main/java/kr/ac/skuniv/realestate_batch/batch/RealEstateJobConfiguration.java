@@ -1,13 +1,10 @@
 package kr.ac.skuniv.realestate_batch.batch;
 
+import javax.sql.DataSource;
 
-import java.util.List;
-
-import kr.ac.skuniv.realestate_batch.batch.item.*;
-import kr.ac.skuniv.realestate_batch.domain.dto.abstractDto.BuildingDealDto;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.batch.core.*;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecutionListener;
+import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.DefaultBatchConfigurer;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -19,7 +16,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.orm.jpa.JpaTransactionManager;
 
-import javax.sql.DataSource;
+import kr.ac.skuniv.realestate_batch.batch.item.RealEstateItemReader;
+import kr.ac.skuniv.realestate_batch.batch.item.RealEstateItemWriter;
+import kr.ac.skuniv.realestate_batch.batch.item.RealEstatePartitioner;
+import kr.ac.skuniv.realestate_batch.domain.dto.abstractDto.BuildingDealDto;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Configuration
@@ -29,7 +31,6 @@ public class RealEstateJobConfiguration extends DefaultBatchConfigurer {
 
     private final RealEstateItemReader realEstateItemReader;
     private final RealEstateItemWriter realEstateItemWriter;
-    private final RealEstateProcessor realEstateProcessor;
     private final RealEstatePartitioner realEstatePartitioner;
 
     private final JobBuilderFactory jobBuilderFactory;
@@ -56,9 +57,8 @@ public class RealEstateJobConfiguration extends DefaultBatchConfigurer {
 
     @Bean
     public Step apiCallStep() {
-        return stepBuilderFactory.get("apiCallStep").<List<BuildingDealDto>, List<BuildingDealDto>>chunk(5)
+        return stepBuilderFactory.get("apiCallStep").<BuildingDealDto, BuildingDealDto>chunk(2)
                 .reader(realEstateItemReader)
-                .processor(realEstateProcessor)
                 .writer(realEstateItemWriter)
                 .transactionManager(jpaTransactionManager())
                 .build();
